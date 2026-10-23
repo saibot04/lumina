@@ -40,8 +40,8 @@ export default function Login() {
                 Iniciar sesión
             </Link>
 
-            <Link href="#" className="self-end text-xs text-primary">
-                Registrarse
+            <Link href="/registro" className="self-end text-xs text-primary">
+            Registrarse
             </Link>
             </div>
         </div>
