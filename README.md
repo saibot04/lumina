@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lumina
 
-## Getting Started
+App de películas y series. El proyecto está dividido en dos partes independientes:
 
-First, run the development server:
+```
+lumina/
+├── frontend/   → Next.js (pantallas y diseño)
+└── backend/    → API propia y base de datos (pendiente)
+```
+
+Por ahora solo hay que ejecutar el `frontend`.
+
+## Cómo correrlo
+
+Requisito: tener [Node.js](https://nodejs.org) (versión LTS) y [Git](https://git-scm.com) instalados.
+
+**1. Clonar el proyecto**
+
+```bash
+git clone https://github.com/TU-USUARIO/lumina.git
+```
+
+**2. Entrar a la carpeta del frontend e instalar las dependencias** (solo la primera vez)
+
+```bash
+cd lumina/frontend
+npm install
+```
+
+**3. Ejecutarlo**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**4. Abrir en el navegador:** <http://localhost:3000>
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Para detener el servidor: `Ctrl + C`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+> En VS Code conviene abrir la carpeta `lumina` (la madre), no `frontend`.
 
-## Learn More
+## Las próximas veces
 
-To learn more about Next.js, take a look at the following resources:
+Alcanza con:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cd lumina/frontend
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Si el `git pull` trae cambios en `package.json`, volver a correr `npm install`.
