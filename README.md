@@ -49,5 +49,3 @@ npm run dev
 ```
 
 Si el `git pull` trae cambios en `package.json`, volver a correr `npm install`.
-
-hola
