@@ -17,7 +17,7 @@ Requisito: tener [Node.js](https://nodejs.org) (versión LTS) y [Git](https://gi
 **1. Clonar el proyecto**
 
 ```bash
-git clone https://github.com/TU-USUARIO/lumina.git
+git clone https://github.com/saibot04/lumina.git
 ```
 
 **2. Entrar a la carpeta del frontend e instalar las dependencias** (solo la primera vez)
