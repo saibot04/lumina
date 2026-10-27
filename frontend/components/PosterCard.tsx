@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-export default function PosterCard({ title, id }: { title: string; id: string }) {
+// Le agregamos el "| number" al id para que no tire error con los números
+export default function PosterCard({ title, id }: { title: string; id: string | number }) {
     return (
         <Link
         href={`/pelicula/${id}`}
