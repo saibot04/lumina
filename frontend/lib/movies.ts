@@ -3,6 +3,15 @@
  * Todo lo que hoy es estático aquí pasará a venir de la base de datos.
  * ------------------------------------------------------------------ */
 
+export type Miembro = { nombre: string; personaje: string };
+
+export type Resena = {
+    usuario: string;
+    puntuacion: number; // 0,5 a 5
+    texto: string;
+    fecha: string;
+};
+
 export type Movie = {
     id: string;
     title: string;
@@ -16,6 +25,12 @@ export type Movie = {
     poster?: string;
     /** Calificación media (0-5). Pendiente de la base de datos. */
     rating?: number;
+    /** Duración en minutos. Pendiente de la base de datos. */
+    duration?: number;
+    /** Elenco con el nombre del personaje. Pendiente de la base de datos. */
+    cast?: Miembro[];
+    /** Reseñas de los usuarios. Pendiente de la base de datos. */
+    reviews?: Resena[];
 };
 
 export const movies: Movie[] = [
@@ -30,6 +45,10 @@ export const movies: Movie[] = [
     { id: "9", title: "Suspiria" },
     { id: "10", title: "Rebecca" },
 ];
+
+export function getMovie(id: string): Movie | undefined {
+    return movies.find((m) => m.id === id);
+}
 
 /* ------------------------------- Géneros ---------------------------------- */
 
