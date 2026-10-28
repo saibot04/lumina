@@ -1,9 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getMovie, slugify } from "@/lib/movies";
+import { actividadDePelicula, getMovie, slugify } from "@/lib/movies";
+import AccionesPelicula from "@/components/AccionesPelicula";
+import ResumenCalificaciones from "@/components/ResumenCalificaciones";
+import TuResena from "@/components/TuResena";
+import ActividadAmigos from "@/components/ActividadAmigos";
+import ResenaCard from "@/components/ResenaCard";
 
-function formatoPuntuacion(n: number) {
-return n.toFixed(1).replace(".", ",");
+function Titulo({ children }: { children: React.ReactNode }) {
+return (
+    <h3 className="mb-3 border-l-2 border-primary pl-3 text-sm font-semibold uppercase tracking-wider">
+    {children}
+    </h3>
+);
 }
 
 export default async function Pelicula({
@@ -16,74 +25,86 @@ const movie = getMovie(id);
 
 if (!movie) notFound();
 
-const reviews = movie.reviews ?? [];
-const promedio =
-    reviews.length > 0
-    ? reviews.reduce((suma, r) => suma + r.puntuacion, 0) / reviews.length
-    : (movie.rating ?? null);
-
-const detalles = [
-    movie.year ? String(movie.year) : null,
-    movie.duration ? `${movie.duration} min` : null,
-].filter(Boolean);
+// HU-12: de la más reciente a la más antigua
+const reviews = [...(movie.reviews ?? [])].sort((a, b) =>
+    b.fecha.localeCompare(a.fecha)
+);
+const amigos = actividadDePelicula(movie.id);
 
 return (
-    <div className="mx-auto max-w-5xl space-y-10">
-    <section className="grid gap-8 md:grid-cols-[240px_1fr]">
-        {/* Póster */}
+    <div className="mx-auto max-w-5xl space-y-8">
+    {/* Imagen + portada + datos */}
+    <section>
         <div
-        className="aspect-[2/3] w-full max-w-[240px] rounded-lg bg-gradient-to-br from-neutral-700 to-neutral-900 bg-cover bg-center"
-        style={movie.poster ? { backgroundImage: `url(${movie.poster})` } : undefined}
+        className="h-48 w-full rounded-lg bg-gradient-to-br from-neutral-800 to-neutral-950 bg-cover bg-center md:h-72"
+        style={movie.backdrop ? { backgroundImage: `url(${movie.backdrop})` } : undefined}
         role="img"
-        aria-label={`Póster de ${movie.title}`}
+        aria-label={`Imagen de ${movie.title}`}
         />
 
-        <div className="space-y-4">
-        <div>
-            <h1 className="text-4xl font-bold">{movie.title}</h1>
-            {detalles.length > 0 && (
-            <p className="mt-1 text-sm text-muted">{detalles.join(" · ")}</p>
+        <div className="relative -mt-12 flex flex-col gap-6 px-4 sm:flex-row sm:items-end md:-mt-20 md:px-8">
+        <div
+            className="aspect-[2/3] w-32 shrink-0 rounded-md border border-white/20 bg-gradient-to-br from-neutral-700 to-neutral-900 bg-cover bg-center shadow-xl md:w-44"
+            style={movie.poster ? { backgroundImage: `url(${movie.poster})` } : undefined}
+            role="img"
+            aria-label={`Portada de ${movie.title}`}
+        />
+
+        <div className="flex-1 space-y-3 pb-1">
+            <h1 className="text-3xl font-bold md:text-4xl">
+            {movie.title}
+            {movie.year && (
+                <span className="ml-3 text-lg font-normal text-muted">{movie.year}</span>
             )}
-        </div>
+            </h1>
 
-        {movie.genres && movie.genres.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-            {movie.genres.map((g) => (
-                <Link
-                key={g}
-                href={`/categoria/${slugify(g)}`}
-                className="rounded-full border border-white/10 px-3 py-1 text-xs text-muted transition hover:border-primary hover:text-primary"
+            {movie.genres && movie.genres.length > 0 && (
+            <p className="text-sm text-muted">
+                {movie.genres.map((g, i) => (
+                <span key={g}>
+                    {i > 0 && " · "}
+                    <Link href={`/categoria/${slugify(g)}`} className="hover:text-primary">
+                    {g}
+                    </Link>
+                </span>
+                ))}
+            </p>
+            )}
+
+            <div className="flex flex-wrap items-center gap-4">
+            {movie.trailer ? (
+                <a
+                href={movie.trailer}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded border border-white/20 px-4 py-1.5 text-sm transition hover:border-primary hover:text-primary"
                 >
-                {g}
-                </Link>
-            ))}
+                ▶ Trailer
+                </a>
+            ) : (
+                <span
+                aria-disabled="true"
+                className="inline-flex cursor-not-allowed items-center gap-2 rounded border border-white/10 px-4 py-1.5 text-sm text-muted opacity-50"
+                >
+                ▶ Trailer
+                </span>
+            )}
+            {movie.duration && (
+                <span className="text-sm text-muted">{movie.duration} min</span>
+            )}
             </div>
-        )}
-
-        <p className="text-sm text-primary">
-            {promedio !== null
-            ? `★ ${formatoPuntuacion(promedio)}${
-                reviews.length > 0 ? ` (${reviews.length} reseñas)` : ""
-                }`
-            : "Sin puntuaciones todavía"}
-        </p>
-
-        <p className="max-w-2xl text-sm leading-relaxed text-muted">
-            {movie.synopsis ?? "Sinopsis no disponible."}
-        </p>
-
-        <div className="flex gap-3 pt-2">
-            <button className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-black transition hover:opacity-90">
-            Ver ahora
-            </button>
-            <button className="rounded-lg border border-white/20 px-6 py-2.5 text-sm transition hover:border-primary hover:text-primary">
-            + Mi lista
-            </button>
         </div>
+
+        <AccionesPelicula />
         </div>
     </section>
 
-    {/* Elenco */}
+    {/* Descripción */}
+    <section className="rounded-lg border border-white/10 p-5 text-sm leading-relaxed text-muted">
+        {movie.synopsis ?? "Sinopsis no disponible."}
+    </section>
+
+    {/* Elenco (lo pide HU-04; no está en el boceto) */}
     <section>
         <h2 className="mb-3 text-lg font-semibold">Elenco</h2>
         {movie.cast && movie.cast.length > 0 ? (
@@ -100,25 +121,41 @@ return (
         )}
     </section>
 
-    {/* Reseñas */}
-    <section>
-        <h2 className="mb-3 text-lg font-semibold">Reseñas</h2>
-        {reviews.length > 0 ? (
-        <ul className="space-y-3">
-            {reviews.map((r, i) => (
-            <li key={i} className="rounded bg-field px-4 py-3 text-sm">
-                <div className="flex items-center justify-between">
-                <p className="font-medium">{r.usuario}</p>
-                <p className="text-primary">★ {formatoPuntuacion(r.puntuacion)}</p>
-                </div>
-                <p className="mt-1 text-muted">{r.texto}</p>
-                <p className="mt-2 text-xs text-muted/70">{r.fecha}</p>
-            </li>
-            ))}
-        </ul>
-        ) : (
-        <p className="text-sm text-muted">Todavía no hay reseñas para esta película.</p>
-        )}
+    {/* Reviews */}
+    <section className="rounded-xl border border-white/10 p-5 sm:p-6">
+        <h2 className="mb-6 text-center text-xl font-semibold">Reviews</h2>
+
+        <div className="space-y-8">
+        <div>
+            <Titulo>Calificaciones</Titulo>
+            <ResumenCalificaciones reviews={reviews} />
+        </div>
+
+        <div>
+            <Titulo>Tu calificación</Titulo>
+            <TuResena />
+        </div>
+
+        <div>
+            <Titulo>Actividad de amigos</Titulo>
+            <ActividadAmigos actividad={amigos} />
+        </div>
+
+        <div>
+            <Titulo>Reseñas de la comunidad</Titulo>
+            {reviews.length > 0 ? (
+            <ul className="space-y-3">
+                {reviews.map((r, i) => (
+                <ResenaCard key={`${r.usuario}-${i}`} resena={r} />
+                ))}
+            </ul>
+            ) : (
+            <p className="text-sm text-muted">
+                Todavía no hay reseñas para esta película.
+            </p>
+            )}
+        </div>
+        </div>
     </section>
     </div>
 );
