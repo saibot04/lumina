@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import ModalAgregar from "@/components/ModalAgregar";
 import GridCasilleros from "@/components/GridCasilleros";
 import VistaCompletaPeliculas from "@/components/VistaCompletaPeliculas";
+import BotonVolver from "@/components/BotonVolver"; // <-- Importamos tu componente
 
 type Stats = { peliculas: number; esteAnio: number; seguidores: number; };
 
@@ -97,6 +98,12 @@ export default function Perfil() {
             <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleCambiarFoto} />
 
             <div className="max-w-4xl mx-auto">
+                
+                {/* Usamos tu componente BotonVolver acá arriba */}
+                <div className="mb-6">
+                    <BotonVolver />
+                </div>
+
                 {/* Cabecera */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/10 pb-8 mb-8">
                     <div className="flex items-center gap-6">
