@@ -1,37 +1,17 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import SelectorOpciones from "@/components/SelectorOpciones";
 import Toggle from "@/components/Toggle";
 import BotonAccion from "@/components/BotonAccion";
 import FilaConfiguracion from "@/components/FilaConfiguracion";
 import Seccion from "@/components/Seccion";
-
-type Stats = {
-    peliculas: number;
-    esteAnio: number;
-    seguidores: number;
-};
-
-const INITIAL_STATS: Stats = { peliculas: 128, esteAnio: 45, seguidores: 247 };
+import BotonVolver from "@/components/BotonVolver"; // <-- Importamos tu componente
 
 export default function CuentaYPerfilPage() {
     const router = useRouter();
-    const [stats] = useState<Stats>(INITIAL_STATS);
     
-    // --- LÓGICA PARA CAMBIAR FOTO ---
-    const [fotoPerfil, setFotoPerfil] = useState<string | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const handleCambiarFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            setFotoPerfil(imageUrl);
-        }
-    };
-
     // --- LÓGICA PARA DATOS DINÁMICOS DEL USUARIO ---
     const [emailUsuario, setEmailUsuario] = useState("Cargando...");
     const [nombreUsuario, setNombreUsuario] = useState("Cargando...");
@@ -39,13 +19,11 @@ export default function CuentaYPerfilPage() {
 
     useEffect(() => {
         const emailGuardado = localStorage.getItem("lumina_user_email");
-        const nombreGuardado = localStorage.getItem("lumina_real_username"); // Buscamos el nombre del registro
+        const nombreGuardado = localStorage.getItem("lumina_real_username");
 
         if (emailGuardado) {
             setEmailUsuario(emailGuardado);
             
-            // Si el usuario viene del registro, usamos su nombre real. 
-            // Si vino directo al Login sin registrarse, usamos el truco de cortar el email.
             if (nombreGuardado) {
                 setNombreUsuario(nombreGuardado.charAt(0).toUpperCase() + nombreGuardado.slice(1));
                 setHandleUsuario("@" + nombreGuardado.toLowerCase().replace(/\s+/g, ''));
@@ -65,64 +43,25 @@ export default function CuentaYPerfilPage() {
         <main className="min-h-screen bg-[#0a0a0a] text-white">
             <div className="px-10 py-8 max-w-4xl mx-auto pb-32">
                 
-                <p className="text-gray-500 text-sm tracking-[0.2em] font-medium mb-6 uppercase">Tu Perfil & Cuenta</p>
-
-                {/* --- CABECERA --- */}
-                <div className="flex justify-between items-start mb-12">
-                    <div>
-                        {/* Acá inyectamos el nombre y el arroba dinámicos */}
-                        <h1 className="text-6xl font-semibold text-white mb-2 tracking-tight">{nombreUsuario}</h1>
-                        <p className="text-gray-400 text-lg mb-4">{handleUsuario}</p>
-                        <div className="inline-block border border-[#fccb30]/30 px-3 py-1 rounded text-[#fccb30] text-xs font-medium tracking-widest uppercase bg-[#fccb30]/5">
-                            Plan Cinéfilo
-                        </div>
-                    </div>
-                    
-                    <div className="flex flex-col items-center gap-3">
-                        <div className="w-24 h-24 rounded-full bg-[#1c1c1c] flex items-center justify-center text-4xl text-white font-medium border border-white/5 shadow-xl overflow-hidden">
-                            {fotoPerfil ? (
-                                <img src={fotoPerfil} alt="Perfil" className="w-full h-full object-cover" />
-                            ) : (
-                                /* Inyecta automáticamente la primera letra de tu nombre */
-                                nombreUsuario.charAt(0).toUpperCase()
-                            )}
-                        </div>
-                        <input 
-                            type="file" 
-                            accept="image/*" 
-                            className="hidden" 
-                            ref={fileInputRef} 
-                            onChange={handleCambiarFoto} 
-                        />
-                        <button 
-                            onClick={() => fileInputRef.current?.click()} 
-                            className="text-[10px] text-gray-500 hover:text-white uppercase tracking-widest transition-colors cursor-pointer"
-                        >
-                            Cambiar foto
-                        </button>
-                    </div>
+                {/* Botón Volver */}
+                <div className="mb-6">
+                    <BotonVolver />
                 </div>
 
-                {/* --- ESTADÍSTICAS --- */}
-                <div className="flex gap-16 border-b border-white/10 pb-8 mb-10">
-                    <div>
-                        <p className="text-4xl font-normal text-white mb-1">{stats.peliculas}</p>
-                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">Películas Vistas</p>
-                    </div>
-                    <div>
-                        <p className="text-4xl font-normal text-gray-400 mb-1">{stats.esteAnio}</p>
-                        <p className="text-[10px] text-gray-600 uppercase tracking-widest">Este Año</p>
-                    </div>
-                    <div>
-                        <p className="text-4xl font-normal text-gray-400 mb-1">{stats.seguidores}</p>
-                        <p className="text-[10px] text-gray-600 uppercase tracking-widest">Seguidores</p>
+                <p className="text-gray-500 text-sm tracking-[0.2em] font-medium mb-6 uppercase">Tu Perfil & Cuenta</p>
+
+                {/* --- CABECERA LIMPIA --- */}
+                <div className="border-b border-white/10 pb-8 mb-10">
+                    <h1 className="text-5xl font-semibold text-white mb-2 tracking-tight">{nombreUsuario}</h1>
+                    <p className="text-gray-400 text-base mb-4">{handleUsuario}</p>
+                    <div className="inline-block border border-[#fccb30]/30 px-3 py-1 rounded text-[#fccb30] text-xs font-medium tracking-widest uppercase bg-[#fccb30]/5">
+                        Plan Cinéfilo
                     </div>
                 </div>
 
                 {/* --- CONFIGURACIONES --- */}
                 
                 <Seccion titulo="Perfil Público">
-                    {/* Acá también reemplazamos los textos estáticos por tus variables */}
                     <FilaConfiguracion titulo="Nombre visible" descripcion="Aparece en las salas y en los foros." accion={<span className="text-gray-300 text-sm">{nombreUsuario}</span>} />
                     <FilaConfiguracion titulo="Usuario" descripcion="Tu identificador único en Lumina." accion={<span className="text-gray-300 text-sm">{handleUsuario}</span>} />
                     <FilaConfiguracion titulo="Perfil visible para la comunidad" descripcion="Otros usuarios pueden ver tus ciclos y tus aportes." accion={<Toggle activoInicial={true} />} />
@@ -169,7 +108,16 @@ export default function CuentaYPerfilPage() {
                         } 
                     />
                     <FilaConfiguracion titulo="Próxima renovación" descripcion="Se renueva automáticamente." accion={<span className="text-gray-400 text-sm">18 de diciembre de 2026</span>} />
-                    <FilaConfiguracion titulo="Método de pago" descripcion="Procesado por una pasarela externa certificada." accion={<div className="flex items-center gap-4"><span className="text-gray-400 text-sm">•••• 4271</span><BotonAccion texto="Actualizar" /></div>} />
+                    <FilaConfiguracion 
+    titulo="Método de pago" 
+    descripcion="Procesado por una pasarela externa certificada." 
+    accion={
+        <div className="flex items-center gap-4">
+            <span className="text-gray-400 text-sm">•••• 4271</span>
+            <BotonAccion texto="Actualizar" onClick={() => router.push('/metodo-de-pago')} />
+        </div>
+    } 
+/>
                 </Seccion>
 
                 <Seccion titulo="Cuenta y Privacidad">
