@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
-import PlanCard from '@/components/PlanCard';
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import BotonVolver from '@/components/BotonVolver';
 
-// Simulamos los datos que en el futuro llegarán de tu backend
 const PLANES = [
   {
     nombre: 'Inicial',
@@ -20,7 +20,7 @@ const PLANES = [
   },
   {
     nombre: 'Principal',
-    precio: '10.000',
+    precio: '$10.000',
     periodo: 'mes',
     destacado: false,
     caracteristicas: [
@@ -33,7 +33,7 @@ const PLANES = [
   },
   {
     nombre: 'Estandar',
-    precio: '25.000',
+    precio: '$25.000',
     periodo: 'mes',
     destacado: true,
     caracteristicas: [
@@ -46,7 +46,7 @@ const PLANES = [
   },
   {
     nombre: 'Cinefilo',
-    precio: '50.000',
+    precio: '$50.000',
     periodo: 'mes',
     destacado: false,
     caracteristicas: [
@@ -60,38 +60,52 @@ const PLANES = [
 ];
 
 export default function SuscripcionesPage() {
-  const [modalidad, setModalidad] = useState<'Mensual' | 'Anual'>('Mensual');
+  const router = useRouter();
+
+  const handleSeleccionarPlan = (nombrePlan: string, precioPlan: string) => {
+    router.push(`/metodo-de-pago?plan=${encodeURIComponent(nombrePlan)}&precio=${encodeURIComponent(precioPlan)}`);
+  };
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white p-10 pb-32">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-5xl font-bold mb-2">Contrata tú plan</h1>
-        <p className="text-xl text-gray-400 mb-12">Y disfruta la experiencia completa</p>
+    <main className="min-h-screen bg-[#0a0a0a] text-white p-8 md:p-12 pb-32">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        <BotonVolver />
 
-        {/* --- PESTAÑAS MENSUAL / ANUAL --- */}
-        <div className="flex gap-6 border-b border-white/20 mb-12 w-max pb-2">
-          <button
-            onClick={() => setModalidad('Mensual')}
-            className={`pb-2 relative ${modalidad === 'Mensual' ? 'text-white' : 'text-gray-500'}`}
-          >
-            Mensual
-            {modalidad === 'Mensual' && <div className="absolute -bottom-[9px] left-0 right-0 h-0.5 bg-white"></div>}
-          </button>
-          <button
-            onClick={() => setModalidad('Anual')}
-            className={`pb-2 relative ${modalidad === 'Anual' ? 'text-white' : 'text-gray-500'}`}
-          >
-            Anual
-            {modalidad === 'Anual' && <div className="absolute -bottom-[9px] left-0 right-0 h-0.5 bg-white"></div>}
-          </button>
+        <div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-2">Contratá tu plan</h1>
+          <p className="text-lg text-gray-400">Y disfrutá la experiencia completa de Lumina</p>
         </div>
 
-        {/* --- GRILLA DE PLANES (Se dibuja sola) --- */}
-        <div className="flex flex-wrap gap-6 justify-start">
+        {/* --- GRILLA DE PLANES --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
           {PLANES.map((plan, index) => (
-            <PlanCard key={index} {...plan} />
+            <div key={index} className="bg-[#141414] border border-white/10 rounded-2xl p-6 flex flex-col justify-between space-y-6">
+              <div className="space-y-3">
+                <h3 className="text-lg font-bold text-white">{plan.nombre}</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold text-[#fccb30]">{plan.precio}</span>
+                  <span className="text-xs text-gray-500">/ {plan.periodo}</span>
+                </div>
+                <ul className="space-y-2 pt-4 border-t border-white/10 text-xs text-gray-300">
+                  {plan.caracteristicas.map((c, i) => (
+                    <li key={i} className="flex items-center gap-2">
+                      <span className="text-[#fccb30]">✓</span> {c}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <button
+                onClick={() => handleSeleccionarPlan(plan.nombre, plan.precio)}
+                className="w-full bg-[#fccb30] text-black font-semibold py-2.5 rounded-xl text-xs uppercase tracking-wider hover:brightness-110 transition cursor-pointer"
+              >
+                Elegir plan
+              </button>
+            </div>
           ))}
         </div>
+
       </div>
     </main>
   );

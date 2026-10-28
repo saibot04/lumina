@@ -1,31 +1,41 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import BotonVolver from "@/components/BotonVolver";
 import PosterCard from "@/components/PosterCard";
 
-// Simulamos los datos basados exactamente en tu diseño
-const PELICULAS_LISTA = [
-  { id: 101, title: "Superman", subtitle: "James Gunn, 2025" },
-  { id: 102, title: "Titanic", subtitle: "James Cameron, 1996" },
-  { id: 103, title: "Gladiator 2", subtitle: "Ridley Scott, 2025" },
-  { id: 104, title: "The prestige", subtitle: "Christopher Nolan, 2006" },
-  { id: 105, title: "Transformers 2", subtitle: "Michael Bay, 2009" },
-  { id: 106, title: "2001: a space odyssey", subtitle: "Stanley Kubrick, 1968" },
-];
-
-const PELICULAS_CONTINUAR = [
-  { id: 201, title: "Something very bad is about to happen", subtitle: "Weronika Tofilska, 2026" },
-  { id: 202, title: "The Batman", subtitle: "Matt Reeves, 2022" },
-  { id: 203, title: "Blade runner", subtitle: "Ridley Scott, 1982" },
-  { id: 204, title: "Inception", subtitle: "Christopher Nolan, 2010" },
-];
-
 export default function MiListaPage() {
+  const [watchlist, setWatchlist] = useState<any[]>([]);
+  const [continuarViendo, setContinuarViendo] = useState<any[]>([]);
+
+  useEffect(() => {
+    const cargarDatos = () => {
+      const watchlistGuardada = JSON.parse(localStorage.getItem("lumina_watchlist") || "[]");
+      setWatchlist(watchlistGuardada);
+
+      const continuarGuardado = JSON.parse(localStorage.getItem("lumina_continuar") || "[]");
+      setContinuarViendo(continuarGuardado);
+    };
+
+    cargarDatos();
+
+    window.addEventListener("storage", cargarDatos);
+    return () => window.removeEventListener("storage", cargarDatos);
+  }, []);
+
+  const eliminarDeWatchlist = (id: string | number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Evita que se abra el detalle al hacer clic en la X
+    const watchlistGuardada = JSON.parse(localStorage.getItem("lumina_watchlist") || "[]");
+    const actualizada = watchlistGuardada.filter((p: any) => String(p.id) !== String(id));
+    localStorage.setItem("lumina_watchlist", JSON.stringify(actualizada));
+    setWatchlist(actualizada);
+    window.dispatchEvent(new Event("storage"));
+  };
+
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white p-8 md:p-12 pb-32">
       <div className="max-w-[1400px] mx-auto">
         
-        {/* Nuestro nuevo componente reciclable */}
         <BotonVolver />
 
         {/* --- SECCIÓN DESCARGAS --- */}
@@ -45,38 +55,60 @@ export default function MiListaPage() {
         {/* --- SECCIÓN MI LISTA --- */}
         <section className="mb-12">
           <h2 className="mb-4 text-base font-medium">Mi lista</h2>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6 gap-y-8">
-            {PELICULAS_LISTA.map((p) => (
-              <div key={p.id} className="flex flex-col gap-2 group cursor-pointer">
-                {/* Reutilizamos tu PosterCard adentro de un contenedor para darle formato */}
-                <div className="w-full aspect-[2/3] overflow-hidden rounded relative transition-transform group-hover:scale-105">
-                  <PosterCard id={p.id} title={p.title} />
+          
+          {watchlist.length === 0 ? (
+            <div className="text-center py-16 text-gray-500 text-xs bg-[#141414]/20 border border-white/5 rounded-xl border-dashed">
+              Tu lista está vacía. Agregá películas desde el botón Watchlist en la vista de detalle.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6 gap-y-8">
+              {watchlist.map((p) => (
+                <div key={p.id} className="flex flex-col gap-2 group relative">
+                  {/* Botón para eliminar la película directamente */}
+                  <button 
+                    onClick={(e) => eliminarDeWatchlist(p.id, e)}
+                    className="absolute top-2 right-2 z-20 bg-black/70 hover:bg-red-600 text-white w-7 h-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs border border-white/20"
+                    title="Quitar de mi lista"
+                  >
+                    ✕
+                  </button>
+
+                  <div className="w-full aspect-[2/3] overflow-hidden rounded relative transition-transform group-hover:scale-105 border border-white/10 cursor-pointer">
+                    <PosterCard id={Number(p.id)} title={p.title} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white truncate">{p.title}</p>
+                    <p className="text-[11px] text-gray-500 truncate">{p.subtitle}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-white truncate">{p.title}</p>
-                  <p className="text-[11px] text-gray-500 truncate">{p.subtitle}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* --- SECCIÓN CONTINUAR VIENDO --- */}
         <section>
           <h2 className="mb-4 text-base font-medium">Continuar viendo</h2>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6 gap-y-8">
-            {PELICULAS_CONTINUAR.map((p) => (
-              <div key={p.id} className="flex flex-col gap-2 group cursor-pointer">
-                <div className="w-full aspect-[2/3] overflow-hidden rounded relative transition-transform group-hover:scale-105">
-                  <PosterCard id={p.id} title={p.title} />
+          
+          {continuarViendo.length === 0 ? (
+            <div className="text-center py-16 text-gray-500 text-xs bg-[#141414]/20 border border-white/5 rounded-xl border-dashed">
+              No tenés películas en curso. Las que empieces a reproducir aparecerán acá.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6 gap-y-8">
+              {continuarViendo.map((p) => (
+                <div key={p.id} className="flex flex-col gap-2 group cursor-pointer">
+                  <div className="w-full aspect-[2/3] overflow-hidden rounded relative transition-transform group-hover:scale-105 border border-white/10">
+                    <PosterCard id={p.id} title={p.title} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white truncate">{p.title}</p>
+                    <p className="text-[11px] text-gray-500 truncate">{p.subtitle}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-white truncate">{p.title}</p>
-                  <p className="text-[11px] text-gray-500 truncate">{p.subtitle}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
       </div>
