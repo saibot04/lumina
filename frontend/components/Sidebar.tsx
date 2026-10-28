@@ -2,19 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Logo from "./Logo";
 
 const categorias = ["Acción", "Comedia", "Drama", "Terror", "Ciencia ficción"];
 
 function slugify(s: string) {
-    return s
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .replace(/\s+/g, "-");
-    }
+return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+}
 
-    export default function Sidebar() {
+export default function Sidebar() {
     const pathname = usePathname();
 
     const link = (href: string, label: string) => (
@@ -30,13 +29,7 @@ function slugify(s: string) {
     );
 
     return (
-        <aside className="hidden w-56 shrink-0 flex-col gap-6 border-r border-white/5 p-4 md:flex">
-        <Logo />
-        <input
-            type="search"
-            placeholder="Buscar"
-            className="rounded bg-field px-3 py-2 text-sm outline-none placeholder:text-muted focus:ring-1 focus:ring-primary"
-        />
+        <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-56 shrink-0 flex-col gap-6 self-start overflow-y-auto border-r border-white/5 p-4 md:flex">
         <nav className="flex flex-col gap-1">
             {link("/inicio", "Inicio")}
             {link("/mi-lista", "Mi lista")}
