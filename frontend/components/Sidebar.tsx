@@ -38,16 +38,15 @@ function slugify(s: string) {
             className="rounded bg-field px-3 py-2 text-sm outline-none placeholder:text-muted focus:ring-1 focus:ring-primary"
         />
          <nav className="flex flex-col gap-1">
-    {link("/inicio", "Inicio")}
-    {link("/mi-lista", "Mi lista")} {/* <-- Tiene que decir exactamente esto */}
+    
+   {/* <-- Tiene que decir exactamente esto */}
     {link("/perfil", "Perfil")}
 </nav><nav className="flex flex-col gap-1">
     {link("/inicio", "Inicio")}
+    {link("/CuentaPerfil", "Perfil social")}      {/* <--- Te lleva al perfil tipo Letterboxd */}
     {link("/mi-lista", "Mi lista")}
-    {link("/suscripciones", "Suscripciones")} {/* <--- Acá agregás tu nueva ruta */}
-    {link("/perfil", "Perfil")}
+       {/* <--- Te lleva a tus configuraciones y planes */}
 </nav>
-        
         <div>
             <p className="mb-2 px-2 text-xs uppercase tracking-wider text-muted/70">
             Categorías
