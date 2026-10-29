@@ -1,9 +1,13 @@
 /* ------------------------------------------------------------------ *
  * Modelos de datos de LUMINA.
+ * lib/movies.ts
  * Todo lo que hoy es estático aquí pasará a venir de la base de datos.
  * ------------------------------------------------------------------ */
 
 export type Miembro = { nombre: string; personaje: string };
+
+/** Integrante del equipo técnico con su puesto. Pendiente de la base de datos. */
+export type MiembroEquipo = { nombre: string; puesto: string };
 
 export type Resena = {
     usuario: string;
@@ -36,6 +40,16 @@ export type Movie = {
     backdrop?: string;
     /** Enlace al tráiler (YouTube, etc.). Pendiente de la base de datos. */
     trailer?: string;
+    /** Director de la película. Pendiente de la base de datos. */
+    director?: string;
+    /** País de producción. Pendiente de la base de datos. */
+    pais?: string;
+    /** Presupuesto en USD. Pendiente de la base de datos. */
+    presupuesto?: number;
+    /** Ingresos de taquilla en USD. Pendiente de la base de datos. */
+    ingresos?: number;
+    /** Equipo técnico (nombre + puesto). Pendiente de la base de datos. */
+    equipo?: MiembroEquipo[];
 };
 
 export const movies: Movie[] = [
@@ -50,6 +64,16 @@ export const movies: Movie[] = [
         cast: [
             { nombre: "Brigitte Helm", personaje: "María" },
             { nombre: "Alfred Abel", personaje: "Joh Fredersen" },
+        ],
+        director: "Fritz Lang",
+        pais: "Alemania",
+        presupuesto: 1300000,
+        ingresos: 750000,
+        equipo: [
+            { nombre: "Fritz Lang", puesto: "Director" },
+            { nombre: "Thea von Harbou", puesto: "Guion" },
+            { nombre: "Erich Kettelhut", puesto: "Diseño de producción" },
+            { nombre: "Karl Freund", puesto: "Fotografía" },
         ],
         reviews: [
             { usuario: "carlitos", puntuacion: 5, texto: "Una obra maestra del cine mudo.", fecha: "2026-10-20", likes: 3 },
@@ -139,6 +163,16 @@ export const movies: Movie[] = [
         cast: [
             { nombre: "Sigourney Weaver", personaje: "Ripley" },
             { nombre: "Tom Skerritt", personaje: "Dallas" },
+        ],
+        director: "Ridley Scott",
+        pais: "Estados Unidos",
+        presupuesto: 11000000,
+        ingresos: 104931801,
+        equipo: [
+            { nombre: "Ridley Scott", puesto: "Director" },
+            { nombre: "Dan O'Bannon", puesto: "Guion" },
+            { nombre: "H. R. Giger", puesto: "Diseño de criatura" },
+            { nombre: "Derek Vanlint", puesto: "Fotografía" },
         ],
         reviews: [
             { usuario: "tomi", puntuacion: 5, texto: "Terror y ciencia ficción en su mejor mezcla.", fecha: "2026-10-21", likes: 4 },

@@ -1,104 +1,178 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getMovie, slugify } from "@/lib/movies";
-import MovieInteractions from "@/components/MovieInteractions";
+import { actividadDePelicula, getMovie, slugify } from "@/lib/movies";
+import AccionesPelicula from "@/components/AccionesPelicula";
+import ResumenCalificaciones from "@/components/ResumenCalificaciones";
+import TuResena from "@/components/TuResena";
+import ActividadAmigos from "@/components/ActividadAmigos";
+import DetallesPelicula from "@/components/DetallesPelicula";
+import ResenaCard from "@/components/ResenaCard";
 import BotonVolver from "@/components/BotonVolver";
-import MovieActions from "@/components/MovieActions";
 
-export default async function PeliculaPage({
-    params,
+function Titulo({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="mb-3 border-l-2 border-primary pl-3 text-sm font-semibold uppercase tracking-wider text-foreground">
+      {children}
+    </h3>
+  );
+}
+
+export default async function Pelicula({
+  params,
 }: {
-    params: Promise<{ id: string }>;
+  params: Promise<{ id: string }>;
 }) {
-    const { id } = await params;
-    const movie = getMovie(id);
+  const { id } = await params;
 
-    if (!movie) notFound();
+  // TODO (backend): traer la película desde la API en vez del arreglo estático
+  const movie = getMovie(id);
 
-    const reviews = movie.reviews ?? [];
-    const promedio =
-        reviews.length > 0
-            ? reviews.reduce((suma, r) => suma + r.puntuacion, 0) / reviews.length
-            : (movie.rating ?? null);
+  if (!movie) notFound();
 
-    return (
-        <main className="min-h-screen bg-[#0a0a0a] text-white pb-32">
-            
-            {/* 1. BANNER DE FONDO ULTRA COMPACTO */}
-            <div className="relative w-full h-[120px] md:h-[180px] bg-neutral-900 overflow-hidden">
-                {movie.poster && (
-                    <div 
-                        className="absolute inset-0 bg-cover bg-center filter blur-xl opacity-30 scale-105"
-                        style={{ backgroundImage: `url(${movie.poster})` }}
-                    />
+  // HU-12: de la más reciente a la más antigua
+  const reviews = [...(movie.reviews ?? [])].sort((a, b) =>
+    b.fecha.localeCompare(a.fecha)
+  );
+  // TODO (backend): la actividad de amigos viene de la API
+  const amigos = actividadDePelicula(movie.id);
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-6 md:space-y-8">
+      <BotonVolver />
+
+      {/* Imagen + portada + datos */}
+      <section>
+        <div
+          className="h-48 w-full rounded-lg border border-white/10 bg-gradient-to-br from-neutral-800 to-neutral-950 bg-cover bg-center md:h-72"
+          style={movie.backdrop ? { backgroundImage: `url(${movie.backdrop})` } : undefined}
+          role="img"
+          aria-label={`Imagen de ${movie.title}`}
+        />
+
+        <div className="relative z-10 -mt-12 flex flex-col gap-4 px-4 md:-mt-20 md:px-8">
+          <div className="flex min-w-0 items-end gap-4">
+            <div
+              className="aspect-[2/3] w-24 shrink-0 rounded-md border border-white/20 bg-gradient-to-br from-neutral-700 to-neutral-900 bg-cover bg-center shadow-xl sm:w-32 md:w-44"
+              style={movie.poster ? { backgroundImage: `url(${movie.poster})` } : undefined}
+              role="img"
+              aria-label={`Portada de ${movie.title}`}
+            />
+
+            <div className="min-w-0 flex-1 space-y-3 pb-1">
+              {/* Título de la película más grande */}
+              <h1 className="text-3xl font-bold sm:text-4xl md:text-5xl">
+                {movie.title}
+                {movie.year && (
+                  <span className="ml-2 text-lg font-normal text-muted sm:ml-3 sm:text-xl">
+                    {movie.year}
+                  </span>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
+              </h1>
+
+              {movie.genres && movie.genres.length > 0 && (
+                <p className="text-xs font-medium uppercase tracking-wider text-primary sm:text-sm">
+                  {movie.genres.map((g, i) => (
+                    <span key={g}>
+                      {i > 0 && " · "}
+                      <Link
+                        href={`/categoria/${slugify(g)}`}
+                        className="[@media(hover:hover)]:hover:underline"
+                      >
+                        {g}
+                      </Link>
+                    </span>
+                  ))}
+                </p>
+              )}
+
+              <p className="text-xs uppercase tracking-wider text-muted sm:text-sm">
+                {movie.director ? (
+                  <>
+                    Dirigida por <span className="text-foreground">{movie.director}</span>
+                  </>
+                ) : (
+                  "Dirección no disponible"
+                )}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-4">
+                {/* TODO (backend): Cambiar a etiqueta <a> con href={movie.trailer} cuando la BD esté lista */}
+                <button
+                  type="button"
+                  aria-disabled="true"
+                  aria-label={`Tráiler de ${movie.title} no disponible momentáneamente`}
+                  className="inline-flex min-h-10 cursor-not-allowed items-center gap-2 rounded border border-primary bg-primary px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-black opacity-70 focus-visible:outline-none"
+                >
+                  ▶ Trailer
+                </button>
                 
-                <div className="absolute top-4 left-4 md:left-8 z-10">
-                    <BotonVolver />
-                </div>
+                {movie.duration && (
+                  <span className="text-sm text-muted">{movie.duration} min</span>
+                )}
+              </div>
             </div>
+          </div>
 
-            {/* 2. CONTENIDO PRINCIPAL */}
-            <div className="max-w-5xl mx-auto px-6 -mt-20 md:-mt-32 relative z-10 space-y-12">
-                
-                <div className="flex flex-col md:flex-row gap-8 items-start">
-                    {/* Póster flotante */}
-                    <div 
-                        className="w-48 sm:w-64 aspect-[2/3] rounded-xl bg-neutral-800 bg-cover bg-center shadow-2xl border border-white/10 shrink-0 mx-auto md:mx-0"
-                        style={movie.poster ? { backgroundImage: `url(${movie.poster})` } : undefined}
-                    />
+          <div className="flex justify-end">
+            <AccionesPelicula />
+          </div>
+        </div>
+      </section>
 
-                    {/* Columna derecha: Título, metadatos, botones interactivos Y DESCRIPCIÓN */}
-                    <div className="space-y-6 flex-1 pt-2">
-                        <div className="space-y-2">
-                            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">{movie.title}</h1>
-                            
-                            {/* Año y Director */}
-                            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400">
-                                <span className="font-medium text-gray-200">
-                                    {movie.year ?? "Año no disponible"}
-                                </span>
-                                <span>•</span>
-                                <span>
-                                    Directed by <strong className="text-white font-medium">{movie.director ?? "Director no especificado"}</strong>
-                                </span>
-                            </div>
-                        </div>
+      {/* Sinopsis */}
+      <section className="rounded-lg border border-white/10 bg-surface p-4 sm:p-6">
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground">
+          Sinopsis de la película
+        </h3>
+        <p className="text-sm leading-relaxed text-muted">
+          {movie.synopsis ?? "Sinopsis no disponible."}
+        </p>
+      </section>
 
-                        {/* Géneros */}
-                        {movie.genres && movie.genres.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
-                                {movie.genres.map((g) => (
-                                    <Link
-                                        key={g}
-                                        href={`/categoria/${slugify(g)}`}
-                                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300 transition hover:border-[#fccb30] hover:text-[#fccb30]"
-                                    >
-                                        {g}
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
+      {/* Calificaciones */}
+      <section className="rounded-lg border border-white/10 bg-surface p-4 sm:p-6">
+        <Titulo>Calificaciones</Titulo>
+        <ResumenCalificaciones reviews={reviews} />
+      </section>
 
-                        {/* Componente interactivo para los botones (Tráiler, Me gusta, Watchlist) */}
-                        <MovieActions movie={movie} />
+      {/* Tu calificación */}
+      <section className="rounded-lg border border-white/10 bg-surface p-4 sm:p-6">
+        <Titulo>Tu calificación</Titulo>
+        <TuResena />
+      </section>
 
-                        {/* Descripción / Sinopsis */}
-                        <div className="pt-2">
-                            <p className="text-sm leading-relaxed text-gray-300">
-                                {movie.synopsis ?? "No hay información ni sinopsis disponible todavía. Se rellenará automáticamente al conectar la base de datos."}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+      {/* Actividad de amigos */}
+      <section className="rounded-lg border border-white/10 bg-surface p-4 sm:p-6">
+        <Titulo>Actividad de amigos</Titulo>
+        <ActividadAmigos actividad={amigos} />
+      </section>
 
-                {/* 3. CALIFICACIONES Y RESEÑAS */}
-                <div className="pt-8 border-t border-white/10">
-                    <MovieInteractions reviews={reviews} promedio={promedio} />
-                </div>
+      {/* Cast / Equipo / Detalles */}
+      <section className="rounded-lg border border-white/10 bg-surface p-4 sm:p-6">
+        <DetallesPelicula
+          cast={movie.cast}
+          equipo={movie.equipo}
+          pais={movie.pais}
+          presupuesto={movie.presupuesto}
+          ingresos={movie.ingresos}
+        />
+      </section>
 
-            </div>
-        </main>
-    );
+      {/* Reseñas de la comunidad */}
+      <section className="rounded-lg border border-white/10 bg-surface p-4 sm:p-6">
+        <Titulo>Reseñas de la comunidad</Titulo>
+        {reviews.length > 0 ? (
+          <ul className="space-y-3">
+            {reviews.map((r, i) => (
+              <ResenaCard key={`${r.usuario}-${i}`} resena={r} />
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted">
+            Todavía no hay reseñas para esta película.
+          </p>
+        )}
+      </section>
+    </div>
+  );
 }
