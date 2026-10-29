@@ -13,7 +13,7 @@ const offset = (pagina - 1) * limite;
 
 const [lista, conteo] = await Promise.all([
     query(
-    `SELECT p.id, p.titulo, p.anio, p.duracion, p.sinopsis, p.poster,
+    `SELECT p.id, p.titulo, p.anio, p.duracion, p.sinopsis, p.poster, p.backdrop,
         COALESCE((
         SELECT ARRAY_AGG(g.nombre ORDER BY g.nombre)
         FROM pelicula_genero pg JOIN generos g ON g.id = pg.genero_id
@@ -38,6 +38,7 @@ return {
     duration: f.duracion,
     synopsis: f.sinopsis,
     poster: f.poster,
+    backdrop: f.backdrop,
     genres: f.generos,
     rating: f.promedio === null ? undefined : Number(f.promedio),
     votes: f.votos,

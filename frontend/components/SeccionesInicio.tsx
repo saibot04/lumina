@@ -153,10 +153,26 @@ export function HeroDestacado({ peliculas }: { peliculas: Movie[] }) {
             aria-roledescription="carrusel"
             className="relative overflow-hidden rounded-xl border border-white/5 bg-gradient-to-r from-neutral-800 to-neutral-900"
         >
-            <div className="flex min-h-[320px] flex-col items-start gap-3 p-8 md:min-h-[400px] md:p-12">
+            {/* Imagen de fondo */}
+            {actual.backdrop && (
+                <div
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${actual.backdrop})` }}
+                />
+            )}
+            <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent"
+            />
+            <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent"
+            />
+
+            <div className="relative z-10 flex min-h-[320px] flex-col items-start gap-3 p-8 md:min-h-[400px] md:p-12">
                 <h1 className="text-4xl font-bold md:text-5xl">{actual.title}</h1>
 
-                {/* Año • género. Se rellenará con los datos de la base de datos. */}
                 {meta && (
                     <p className="text-xs uppercase tracking-wider text-muted">
                         {meta}
@@ -164,7 +180,9 @@ export function HeroDestacado({ peliculas }: { peliculas: Movie[] }) {
                 )}
 
                 {actual.synopsis && (
-                    <p className="max-w-md text-sm text-muted">{actual.synopsis}</p>
+                    <p className="line-clamp-4 max-w-md text-sm text-gray-300">
+                        {actual.synopsis}
+                    </p>
                 )}
 
                 <Link
@@ -177,7 +195,7 @@ export function HeroDestacado({ peliculas }: { peliculas: Movie[] }) {
 
             {hayVarias && (
                 <>
-                    <div className="absolute bottom-6 left-8 flex items-center gap-2 md:left-12">
+                    <div className="absolute bottom-6 left-8 z-10 flex items-center gap-2 md:left-12">
                         {peliculas.map((p, i) => (
                             <button
                                 key={p.id}
@@ -194,7 +212,7 @@ export function HeroDestacado({ peliculas }: { peliculas: Movie[] }) {
                         ))}
                     </div>
 
-                    <div className="absolute bottom-5 right-8 flex items-center gap-2 md:right-12">
+                    <div className="absolute bottom-5 right-8 z-10 flex items-center gap-2 md:right-12">
                         <button
                             type="button"
                             onClick={() => mover(-1)}

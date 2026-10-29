@@ -15,7 +15,8 @@ export default async function Inicio() {
         ),
     ]);
 
-    const destacadas = top.datos.slice(0, 5);
+    const conFondo = top.datos.filter((m) => m.backdrop);
+    const destacadas = (conFondo.length >= 3 ? conFondo : top.datos).slice(0, 5);
 
     return (
         <div className="space-y-10">
