@@ -1,6 +1,6 @@
 -- Se borra todo y se vuelve a crear: sirve para desarrollo,
 -- pero ejecutarlo elimina los datos existentes.
-DROP TABLE IF EXISTS vistas, resenas, elenco, pelicula_genero,
+DROP TABLE IF EXISTS sesiones, vistas, resenas, elenco, pelicula_genero,
                 personas, generos, peliculas, usuarios CASCADE;
 
 CREATE TABLE usuarios (
@@ -11,6 +11,13 @@ password_hash   TEXT         NOT NULL,
 rol             VARCHAR(10)  NOT NULL DEFAULT 'usuario'
                 CHECK (rol IN ('usuario', 'admin')),
 creado_en       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE sesiones (
+token_hash  CHAR(64) PRIMARY KEY,
+usuario_id  INT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+creada_en   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+expira_en   TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE peliculas (
