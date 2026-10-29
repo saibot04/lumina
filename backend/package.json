@@ -7,7 +7,8 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "db:init": "node src/db/init.js",
-    "tmdb:probar": "node src/db/probar-tmdb.js"
+    "tmdb:probar": "node src/db/probar-tmdb.js",
+    "db:importar": "node src/db/importar-tmdb.js"
   },
   "keywords": [],
   "author": "",

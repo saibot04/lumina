@@ -31,6 +31,10 @@ export type Movie = {
     cast?: Miembro[];
     /** Reseñas de los usuarios. Pendiente de la base de datos. */
     reviews?: Resena[];
+    /** Clave del tráiler de YouTube. Viene del backend. */
+    trailerKey?: string;
+    /** Director. Pendiente de la base de datos. */
+    director?: string
 };
 
 export const movies: Movie[] = [
@@ -117,3 +121,19 @@ export type ActividadAmigo = {
     /** Fecha de la actividad. */
     fecha?: string;
 };
+
+/* --------------------------- Conexión con la API --------------------------- */
+
+const API_URL = process.env.API_URL ?? "http://localhost:4000";
+
+export async function fetchPelicula(id: string): Promise<Movie | null> {
+    try {
+        const res = await fetch(`${API_URL}/api/peliculas/${id}`, {
+            cache: "no-store",
+        });
+        if (!res.ok) return null;
+        return res.json();
+    } catch {
+        return null;
+    }
+}

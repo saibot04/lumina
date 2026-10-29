@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getMovie, slugify } from "@/lib/movies";
+import { fetchPelicula, slugify } from "@/lib/movies";
 import MovieInteractions from "@/components/MovieInteractions";
 import BotonVolver from "@/components/BotonVolver";
 import MovieActions from "@/components/MovieActions";
@@ -11,7 +11,7 @@ export default async function PeliculaPage({
     params: Promise<{ id: string }>;
 }) {
     const { id } = await params;
-    const movie = getMovie(id);
+    const movie = await fetchPelicula(id);
 
     if (!movie) notFound();
 
