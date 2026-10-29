@@ -51,7 +51,7 @@ const pelicula = await query("SELECT * FROM peliculas WHERE id = $1", [id]);
 if (pelicula.rows.length === 0) return null;
 const p = pelicula.rows[0];
 
-const [generos, elenco, resenas] = await Promise.all([
+const [generos, elenco, resenas, director] = await Promise.all([
     query(
     `SELECT g.nombre FROM pelicula_genero pg
     JOIN generos g ON g.id = pg.genero_id
@@ -59,7 +59,7 @@ const [generos, elenco, resenas] = await Promise.all([
     [id]
     ),
     query(
-    `SELECT pe.nombre, e.personaje FROM elenco e
+    `SELECT pe.nombre, pe.foto, e.personaje FROM elenco e
     JOIN personas pe ON pe.id = e.persona_id
     WHERE e.pelicula_id = $1 AND e.rol = 'actor' ORDER BY e.id`,
     [id]
@@ -68,6 +68,13 @@ const [generos, elenco, resenas] = await Promise.all([
     `SELECT u.nombre_usuario AS usuario, r.puntuacion, r.texto, r.creado_en
     FROM resenas r JOIN usuarios u ON u.id = r.usuario_id
     WHERE r.pelicula_id = $1 ORDER BY r.creado_en DESC`,
+    [id]
+    ),
+    query(
+    `SELECT pe.nombre FROM elenco e
+    JOIN personas pe ON pe.id = e.persona_id
+    WHERE e.pelicula_id = $1 AND e.rol = 'director'
+    ORDER BY e.id`,
     [id]
     ),
 ]);
@@ -81,8 +88,13 @@ return {
     poster: p.poster,
     backdrop: p.backdrop,
     trailerKey: p.trailer_key,
+    director: director.rows.map((d) => d.nombre).join(", ") || undefined,
     genres: generos.rows.map((g) => g.nombre),
-    cast: elenco.rows.map((c) => ({ nombre: c.nombre, personaje: c.personaje ?? "" })),
+    cast: elenco.rows.map((c) => ({
+    nombre: c.nombre,
+    personaje: c.personaje ?? "",
+    foto: c.foto ?? undefined,
+    })),
     reviews: resenas.rows.map((r) => ({
     usuario: r.usuario,
     puntuacion: Number(r.puntuacion),

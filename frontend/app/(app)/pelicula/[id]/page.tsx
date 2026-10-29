@@ -24,16 +24,23 @@ export default async function PeliculaPage({
     return (
         <main className="min-h-screen bg-[#0a0a0a] text-white pb-32">
             
-            {/* 1. BANNER DE FONDO ULTRA COMPACTO */}
-            <div className="relative w-full h-[120px] md:h-[180px] bg-neutral-900 overflow-hidden">
-                {movie.poster && (
-                    <div 
-                        className="absolute inset-0 bg-cover bg-center filter blur-xl opacity-30 scale-105"
-                        style={{ backgroundImage: `url(${movie.poster})` }}
+            {/* 1. BANNER DE FONDO */}
+            <div className="relative w-full h-[200px] md:h-[320px] bg-neutral-900 overflow-hidden">
+                {movie.backdrop ? (
+                    <div
+                        className="absolute inset-0 bg-cover bg-center opacity-60"
+                        style={{ backgroundImage: `url(${movie.backdrop})` }}
                     />
+                ) : (
+                    movie.poster && (
+                        <div
+                            className="absolute inset-0 bg-cover bg-center filter blur-xl opacity-30 scale-105"
+                            style={{ backgroundImage: `url(${movie.poster})` }}
+                        />
+                    )
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
-                
+
                 <div className="absolute top-4 left-4 md:left-8 z-10">
                     <BotonVolver />
                 </div>

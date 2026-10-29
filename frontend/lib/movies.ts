@@ -3,7 +3,7 @@
  * Todo lo que hoy es estático aquí pasará a venir de la base de datos.
  * ------------------------------------------------------------------ */
 
-export type Miembro = { nombre: string; personaje: string };
+export type Miembro = { nombre: string; personaje: string; foto?: string };
 
 export type Resena = {
     usuario: string;
@@ -35,6 +35,8 @@ export type Movie = {
     trailerKey?: string;
     /** Director. Pendiente de la base de datos. */
     director?: string
+    /** Imagen grande de fondo. Viene de la API. */
+    backdrop?: string;
 };
 
 export const movies: Movie[] = [
