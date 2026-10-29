@@ -14,14 +14,15 @@ creado_en       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE peliculas (
-id        SERIAL PRIMARY KEY,
-titulo    VARCHAR(200) NOT NULL,
-anio      SMALLINT     NOT NULL,
-duracion  SMALLINT     NOT NULL,
-sinopsis  TEXT,
-poster    TEXT,
-backdrop  TEXT,
-trailer   TEXT
+id           SERIAL PRIMARY KEY,
+tmdb_id      INT UNIQUE,
+titulo       VARCHAR(200) NOT NULL,
+anio         SMALLINT     NOT NULL,
+duracion     SMALLINT     NOT NULL,
+sinopsis     TEXT,
+poster       TEXT,
+backdrop     TEXT,
+trailer_key  VARCHAR(20)
 );
 
 CREATE TABLE generos (
