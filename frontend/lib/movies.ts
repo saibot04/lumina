@@ -139,3 +139,41 @@ export async function fetchPelicula(id: string): Promise<Movie | null> {
         return null;
     }
 }
+export type PaginaPeliculas = {
+    datos: Movie[];
+    pagina: number;
+    limite: number;
+    total: number;
+    totalPaginas: number;
+};
+
+export async function fetchPeliculas(
+    opciones: { genero?: string; pagina?: number; limite?: number } = {}
+): Promise<PaginaPeliculas> {
+    const vacio: PaginaPeliculas = {
+        datos: [],
+        pagina: 1,
+        limite: opciones.limite ?? 12,
+        total: 0,
+        totalPaginas: 0,
+    };
+
+    const params = new URLSearchParams();
+    if (opciones.genero) params.set("genero", opciones.genero);
+    if (opciones.pagina) params.set("pagina", String(opciones.pagina));
+    if (opciones.limite) params.set("limite", String(opciones.limite));
+
+    try {
+        const res = await fetch(`${API_URL}/api/peliculas?${params}`, {
+            cache: "no-store",
+        });
+        if (!res.ok) {
+            console.error(`fetchPeliculas: el back respondió ${res.status}`);
+            return vacio;
+        }
+        return res.json();
+    } catch (error) {
+        console.error(`fetchPeliculas: no se pudo conectar con ${API_URL}`, error);
+        return vacio;
+    }
+}

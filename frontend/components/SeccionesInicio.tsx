@@ -117,6 +117,7 @@ export function FilaPeliculas({
                             <PosterCard
                                 id={m.id}
                                 title={m.title}
+                                poster={m.poster}
                                 rank={numerada ? i + 1 : undefined}
                                 className={ancho}
                             />
