@@ -76,8 +76,7 @@ if (!usuario || !valido) {
     return res.status(401).json({ error: "Email o contraseña incorrectos." });
 }
 
-const token = await Sesion.crear(usuario.id);
-res.json({ token, usuario: datosPublicos(usuario) });
+res.status(201).json({ usuario: datosPublicos(usuario) });
 }
 
 export async function logout(req, res) {
