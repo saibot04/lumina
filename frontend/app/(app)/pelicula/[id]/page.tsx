@@ -60,7 +60,7 @@ export default async function Pelicula({
 
             <div className="min-w-0 flex-1 space-y-3 pb-1">
               {/* Título de la película más grande */}
-              <h1 className="text-3xl font-bold sm:text-4xl md:text-5xl">
+              <h1 className="text-4xl font-bold sm:text-5xl md:text-7xl">
                 {movie.title}
                 {movie.year && (
                   <span className="ml-2 text-lg font-normal text-muted sm:ml-3 sm:text-xl">
