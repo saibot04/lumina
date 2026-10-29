@@ -45,8 +45,7 @@ if (Object.keys(errores).length > 0) {
 try {
     const passwordHash = await bcrypt.hash(password, 10);
     const usuario = await Usuario.crear({ nombreUsuario, email, passwordHash });
-    const token = await Sesion.crear(usuario.id);
-    res.status(201).json({ token, usuario: datosPublicos(usuario) });
+    res.status(201).json({ usuario: datosPublicos(usuario) });
 } catch (error) {
     // 23505 = valor repetido en una columna UNIQUE
     if (error.code === "23505") {
@@ -76,7 +75,8 @@ if (!usuario || !valido) {
     return res.status(401).json({ error: "Email o contraseña incorrectos." });
 }
 
-res.status(201).json({ usuario: datosPublicos(usuario) });
+const token = await Sesion.crear(usuario.id);
+res.json({ token, usuario: datosPublicos(usuario) });
 }
 
 export async function logout(req, res) {
