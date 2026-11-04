@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Logo from "./Logo";
 import EnlaceNav from "./EnlaceNav";
 import { cerrarSesion } from "@/app/auth/actions";
@@ -47,8 +48,10 @@ const enlaceTexto =
  * undefined mientras se consulta (no se muestran botones de cuenta).
  */
 export default function Header({ usuario }: { usuario?: UsuarioSesion | null }) {
+    const router = useRouter();
     const [menuAbierto, setMenuAbierto] = useState(false);
     const [buscando, setBuscando] = useState(false);
+    const [texto, setTexto] = useState("");
 
     useEffect(() => {
         const alPulsar = (e: KeyboardEvent) => {
@@ -62,6 +65,15 @@ export default function Header({ usuario }: { usuario?: UsuarioSesion | null }) 
     }, []);
 
     const cerrarMenu = () => setMenuAbierto(false);
+
+    // Lleva a la página de resultados: /buscar?q=texto
+    const buscar = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const q = texto.trim();
+        if (!q) return;
+        router.push(`/buscar?q=${encodeURIComponent(q)}`);
+        setBuscando(false);
+    };
 
     const itemsMenu = [...MENU_BASE, ...(usuario === null ? MENU_VISITANTE : [])];
 
@@ -102,20 +114,27 @@ export default function Header({ usuario }: { usuario?: UsuarioSesion | null }) 
 
                 {/* Escritorio: buscador y avatar */}
                 <div className="hidden items-center gap-4 md:flex">
-                    <div className="relative flex items-center">
+                    <form
+                        onSubmit={buscar}
+                        role="search"
+                        className="relative flex items-center"
+                    >
                         <input
                             type="search"
+                            value={texto}
+                            onChange={(e) => setTexto(e.target.value)}
                             placeholder="Buscar..."
+                            aria-label="Buscar películas"
                             className="h-8 w-36 rounded-full bg-field pl-4 pr-8 text-xs text-foreground outline-none transition-all placeholder:text-muted focus:w-48 focus:ring-1 focus:ring-primary"
                         />
                         <button
-                            type="button"
+                            type="submit"
                             aria-label="Buscar"
                             className="absolute right-2.5 text-muted transition-colors hover:text-primary"
                         >
                             <IconoLupa className="h-3.5 w-3.5" />
                         </button>
-                    </div>
+                    </form>
 
                     <Link
                         href={usuario ? "/perfil" : "/login"}
@@ -164,14 +183,22 @@ export default function Header({ usuario }: { usuario?: UsuarioSesion | null }) 
 
             {/* Móvil: barra de búsqueda desplegable */}
             {buscando && (
-                <div id="buscador-movil" className="px-4 pb-3 md:hidden">
+                <form
+                    id="buscador-movil"
+                    onSubmit={buscar}
+                    role="search"
+                    className="px-4 pb-3 md:hidden"
+                >
                     <input
                         type="search"
+                        value={texto}
+                        onChange={(e) => setTexto(e.target.value)}
                         placeholder="Buscar películas..."
+                        aria-label="Buscar películas"
                         autoFocus
                         className="w-full rounded bg-field px-3 py-2 text-sm outline-none placeholder:text-muted focus:ring-1 focus:ring-primary"
                     />
-                </div>
+                </form>
             )}
 
             {/* Móvil: menú lateral */}

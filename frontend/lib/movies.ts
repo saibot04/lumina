@@ -1,7 +1,5 @@
 /* ------------------------------------------------------------------ *
- * Modelos de datos de LUMINA.
- * lib/movies.ts
- * Todo lo que hoy es estático aquí pasará a venir de la base de datos.
+ * Modelos de datos de LUMINA
  * ------------------------------------------------------------------ */
 
 export type Miembro = { nombre: string; personaje: string; foto?: string };
@@ -406,7 +404,7 @@ export const movies: Movie[] = [
         ],
     },
 ];
-    
+
 export function getMovie(id: string): Movie | undefined {
     return movies.find((m) => m.id === id);
 }
@@ -504,7 +502,13 @@ export type PaginaPeliculas = {
 };
 
 export async function fetchPeliculas(
-    opciones: { genero?: string; pagina?: number; limite?: number } = {}
+    opciones: {
+        genero?: string;
+        /** Texto a buscar en el título o en el género. */
+        busqueda?: string;
+        pagina?: number;
+        limite?: number;
+    } = {}
 ): Promise<PaginaPeliculas> {
     const vacio: PaginaPeliculas = {
         datos: [],
@@ -516,6 +520,7 @@ export async function fetchPeliculas(
 
     const params = new URLSearchParams();
     if (opciones.genero) params.set("genero", opciones.genero);
+    if (opciones.busqueda) params.set("busqueda", opciones.busqueda);
     if (opciones.pagina) params.set("pagina", String(opciones.pagina));
     if (opciones.limite) params.set("limite", String(opciones.limite));
 
