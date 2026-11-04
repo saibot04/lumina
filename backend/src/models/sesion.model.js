@@ -27,3 +27,10 @@ return resultado.rows[0] ?? null;
 export async function eliminar(token) {
 await query("DELETE FROM sesiones WHERE token_hash = $1", [hashear(token)]);
 }
+
+export async function cerrarOtras(usuarioId, tokenActual) {
+await query(
+    "DELETE FROM sesiones WHERE usuario_id = $1 AND token_hash <> $2",
+    [usuarioId, hashear(tokenActual)]
+);
+}

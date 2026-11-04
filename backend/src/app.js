@@ -3,6 +3,7 @@ import cors from "cors";
 import healthRoutes from "./routes/health.routes.js";
 import peliculasRoutes from "./routes/peliculas.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import usuariosRoutes from "./routes/usuarios.routes.js";
 
 const app = express();
 
@@ -16,6 +17,8 @@ res.json({ mensaje: "API de Lumina funcionando" });
 
 app.use("/api/health", healthRoutes);
 app.use("/api/peliculas", peliculasRoutes);
+
+app.use("/api/usuarios", usuariosRoutes);
 
 // Ruta inexistente
 app.use((req, res) => {

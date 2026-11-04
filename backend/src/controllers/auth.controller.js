@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { errorNombreUsuario, errorEmail, errorPassword } from "../utils/validaciones.js";
 import * as Usuario from "../models/usuario.model.js";
 import * as Sesion from "../models/sesion.model.js";
 
@@ -17,17 +18,12 @@ return {
 
 function validarRegistro({ nombreUsuario, email, password }) {
 const errores = {};
-
-if (!/^[A-Za-z0-9_]{3,30}$/.test(nombreUsuario)) {
-    errores.nombreUsuario =
-    "Usá de 3 a 30 caracteres: letras, números o guion bajo.";
-}
-if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 255) {
-    errores.email = "Ingresá un email válido.";
-}
-if (password.length < 8 || password.length > 72) {
-    errores.password = "La contraseña debe tener entre 8 y 72 caracteres.";
-}
+const eUsuario = errorNombreUsuario(nombreUsuario);
+const eEmail = errorEmail(email);
+const ePassword = errorPassword(password);
+if (eUsuario) errores.nombreUsuario = eUsuario;
+if (eEmail) errores.email = eEmail;
+if (ePassword) errores.password = ePassword;
 return errores;
 }
 

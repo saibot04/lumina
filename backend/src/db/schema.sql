@@ -10,6 +10,8 @@ email           VARCHAR(255) NOT NULL UNIQUE,
 password_hash   TEXT         NOT NULL,
 rol             VARCHAR(10)  NOT NULL DEFAULT 'usuario'
                 CHECK (rol IN ('usuario', 'admin')),
+nombre_mostrado VARCHAR(60),
+bio             VARCHAR(300),
 creado_en       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
