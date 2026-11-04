@@ -1,13 +1,14 @@
+import { Suspense } from "react";
 import PosterCard from "@/components/PosterCard";
 import { EstadoVacio } from "@/components/SeccionesInicio";
 import { fetchPeliculas } from "@/lib/movies";
 
 // Ubicación: app/(app)/buscar/page.tsx
-export default async function Buscar({
-    searchParams,
-}: {
-    searchParams: Promise<{ q?: string }>;
-}) {
+
+type Props = { searchParams: Promise<{ q?: string }> };
+
+// Esta parte lee la URL y pide los datos. Por eso va dentro de <Suspense>.
+async function Resultados({ searchParams }: Props) {
     const { q } = await searchParams;
     const busqueda = (q ?? "").trim();
 
@@ -16,7 +17,7 @@ export default async function Buscar({
         : null;
 
     return (
-        <div className="space-y-6">
+        <>
             <h1 className="text-2xl font-bold md:text-3xl">
                 {busqueda ? (
                     <>
@@ -45,6 +46,16 @@ export default async function Buscar({
                     ))}
                 </div>
             )}
+        </>
+    );
+}
+
+export default function Buscar({ searchParams }: Props) {
+    return (
+        <div className="space-y-6">
+            <Suspense fallback={<p className="text-sm text-muted">Buscando...</p>}>
+                <Resultados searchParams={searchParams} />
+            </Suspense>
         </div>
     );
 }
