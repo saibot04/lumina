@@ -12,7 +12,7 @@ const contactos = [
   "tobias24385@gmail.com",
   "milagroszanini15@gmail.com",
   "matein06@gmail.com",
-  "@gmail.com",
+  "justo.e.graneros@gmail.com",
 ];
 
 export default function Footer() {
