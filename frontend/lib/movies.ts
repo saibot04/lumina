@@ -1,6 +1,3 @@
-/* ------------------------------------------------------------------ *
- * Modelos de datos de LUMINA
- * ------------------------------------------------------------------ */
 
 export type Miembro = { nombre: string; personaje: string; foto?: string };
 
@@ -504,6 +501,8 @@ export type PaginaPeliculas = {
 export async function fetchPeliculas(
     opciones: {
         genero?: string;
+        /** Varios géneros a la vez (slugs). La película debe tenerlos todos. */
+        generos?: string[];
         /** Texto a buscar en el título o en el género. */
         busqueda?: string;
         pagina?: number;
@@ -520,6 +519,7 @@ export async function fetchPeliculas(
 
     const params = new URLSearchParams();
     if (opciones.genero) params.set("genero", opciones.genero);
+    if (opciones.generos?.length) params.set("generos", opciones.generos.join(","));
     if (opciones.busqueda) params.set("busqueda", opciones.busqueda);
     if (opciones.pagina) params.set("pagina", String(opciones.pagina));
     if (opciones.limite) params.set("limite", String(opciones.limite));

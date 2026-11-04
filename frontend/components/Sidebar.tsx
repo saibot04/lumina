@@ -27,7 +27,8 @@ export default function Sidebar() {
           <EnlaceNav key={n.href} href={n.href} label={n.label} />
         ))}
       </nav>
-      
+
+      {/* mt-8 suma espacio extra entre Suscripciones y Géneros */}
       <div className="mt-8 flex flex-col gap-3">
         <p className="text-sm font-semibold uppercase tracking-wider text-primary">
           Géneros
@@ -37,7 +38,7 @@ export default function Sidebar() {
           {GENEROS_DESTACADOS.map((g) => (
             <li key={g}>
               <Link
-                href={`/categoria/${slugify(g)}`}
+                href={`/generos?generos=${slugify(g)}`}
                 className="block rounded-full border border-white/10 px-2.5 py-1 text-xs text-muted transition hover:border-primary hover:text-primary"
               >
                 {g}

@@ -1,12 +1,12 @@
 import { query } from "../config/db.js";
 
-// $1 = slug del género (o null para no filtrar)
 const FILTRO_GENERO = `
-($1::text IS NULL OR EXISTS (
-    SELECT 1 FROM pelicula_genero pg
+($1::text[] IS NULL OR (
+    SELECT COUNT(DISTINCT g.slug)
+    FROM pelicula_genero pg
     JOIN generos g ON g.id = pg.genero_id
-    WHERE pg.pelicula_id = p.id AND g.slug = $1
-))`;
+    WHERE pg.pelicula_id = p.id AND g.slug = ANY($1::text[])
+) = cardinality($1::text[]))`;
 
 // Coincide con el título o con el nombre de algún género de la película,
 
@@ -20,7 +20,7 @@ const FILTRO_BUSQUEDA = `
       AND translate(lower(g.nombre), 'áéíóúüñ', 'aeiouun') LIKE '%' || $2 || '%'
 ))`;
 
-export async function listar({ genero, busqueda, pagina, limite }) {
+export async function listar({ generos, busqueda, pagina, limite }) {
     const offset = (pagina - 1) * limite;
 
     const [lista, conteo] = await Promise.all([
@@ -37,12 +37,12 @@ export async function listar({ genero, busqueda, pagina, limite }) {
             WHERE ${FILTRO_GENERO} AND ${FILTRO_BUSQUEDA}
             ORDER BY p.id
             LIMIT $3 OFFSET $4`,
-            [genero, busqueda, limite, offset]
+            [generos, busqueda, limite, offset]
         ),
         query(
             `SELECT COUNT(*)::int AS total FROM peliculas p
             WHERE ${FILTRO_GENERO} AND ${FILTRO_BUSQUEDA}`,
-            [genero, busqueda]
+            [generos, busqueda]
         ),
     ]);
 

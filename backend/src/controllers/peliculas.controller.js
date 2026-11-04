@@ -1,6 +1,5 @@
 import * as Pelicula from "../models/pelicula.model.js";
 
-
 function normalizarBusqueda(texto) {
     if (typeof texto !== "string") return null;
 
@@ -16,12 +15,17 @@ function normalizarBusqueda(texto) {
 }
 
 export async function listar(req, res) {
-    const genero = req.query.genero || null;
+    
+    const slugs = String(req.query.generos ?? req.query.genero ?? "")
+        .split(",")
+        .map((g) => g.trim())
+        .filter(Boolean);
+    const generos = slugs.length ? [...new Set(slugs)] : null;
     const busqueda = normalizarBusqueda(req.query.busqueda);
     const pagina = Math.max(parseInt(req.query.pagina) || 1, 1);
     const limite = Math.min(Math.max(parseInt(req.query.limite) || 12, 1), 50);
 
-    const { datos, total } = await Pelicula.listar({ genero, busqueda, pagina, limite });
+    const { datos, total } = await Pelicula.listar({ generos, busqueda, pagina, limite });
 
     res.json({
         datos,
