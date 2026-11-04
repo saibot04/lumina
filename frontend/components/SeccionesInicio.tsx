@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import PosterCard from "./PosterCard";
 import { slugify } from "@/lib/movies";
@@ -133,19 +133,30 @@ export function FilaPeliculas({
 
 export function HeroDestacado({ peliculas }: { peliculas: Movie[] }) {
     const [indice, setIndice] = useState(0);
+    const cantidad = peliculas.length;
 
-    if (peliculas.length === 0) {
+    // Avance automático cada 5 segundos
+    useEffect(() => {
+        if (cantidad < 2) return;
+
+        const intervalo = setInterval(() => {
+            setIndice((i) => (i + 1) % cantidad);
+        }, 5000);
+
+        // Al hacer clic en un puntito, `indice` cambia y el intervalo se
+        // reinicia, así no salta enseguida después de elegir manualmente.
+        return () => clearInterval(intervalo);
+    }, [cantidad, indice]);
+
+    if (cantidad === 0) {
         return <EstadoVacio mensaje="Todavía no hay películas destacadas." />;
     }
 
-    const actual = peliculas[Math.min(indice, peliculas.length - 1)];
+    const actual = peliculas[Math.min(indice, cantidad - 1)];
     const meta = [actual.year, actual.genres?.join(" · ")]
         .filter(Boolean)
         .join(" • ");
-    const hayVarias = peliculas.length > 1;
-
-    const mover = (paso: number) =>
-        setIndice((i) => (i + paso + peliculas.length) % peliculas.length);
+    const hayVarias = cantidad > 1;
 
     return (
         <section
@@ -194,43 +205,22 @@ export function HeroDestacado({ peliculas }: { peliculas: Movie[] }) {
             </div>
 
             {hayVarias && (
-                <>
-                    <div className="absolute bottom-6 left-8 z-10 flex items-center gap-2 md:left-12">
-                        {peliculas.map((p, i) => (
-                            <button
-                                key={p.id}
-                                type="button"
-                                onClick={() => setIndice(i)}
-                                aria-label={`Ir a ${p.title}`}
-                                aria-current={i === indice}
-                                className={`h-1.5 rounded-full transition-all ${
-                                    i === indice
-                                        ? "w-6 bg-primary"
-                                        : "w-1.5 bg-white/30 hover:bg-white/60"
-                                }`}
-                            />
-                        ))}
-                    </div>
-
-                    <div className="absolute bottom-5 right-8 z-10 flex items-center gap-2 md:right-12">
+                <div className="absolute bottom-6 left-8 z-10 flex items-center gap-2 md:left-12">
+                    {peliculas.map((p, i) => (
                         <button
+                            key={p.id}
                             type="button"
-                            onClick={() => mover(-1)}
-                            aria-label="Película destacada anterior"
-                            className="flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-lg leading-none text-white transition hover:bg-black/80"
-                        >
-                            ‹
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => mover(1)}
-                            aria-label="Película destacada siguiente"
-                            className="flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-lg leading-none text-white transition hover:bg-black/80"
-                        >
-                            ›
-                        </button>
-                    </div>
-                </>
+                            onClick={() => setIndice(i)}
+                            aria-label={`Ir a ${p.title}`}
+                            aria-current={i === indice}
+                            className={`h-1.5 rounded-full transition-all ${
+                                i === indice
+                                    ? "w-6 bg-primary"
+                                    : "w-1.5 bg-white/30 hover:bg-white/60"
+                            }`}
+                        />
+                    ))}
+                </div>
             )}
         </section>
     );

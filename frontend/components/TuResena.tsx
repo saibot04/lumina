@@ -121,11 +121,9 @@ return (
                 ? `Tu calificación: ${coma(valor)} / 5`
                 : "Tocá una estrella para calificar"}
             </p>
-            <p className="text-xs text-muted">
-            {valor > 0
-                ? "Podés cambiarla cuando quieras"
-                : "Todavía no calificaste esta película"}
-            </p>
+            {valor > 0 && (
+            <p className="text-xs text-muted">Podés cambiarla cuando quieras</p>
+            )}
         </div>
         </div>
 

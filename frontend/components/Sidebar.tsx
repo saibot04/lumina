@@ -21,15 +21,15 @@ const GENEROS_DESTACADOS = [
 
 export default function Sidebar() {
   return (
-    <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-56 shrink-0 flex-col gap-6 self-start overflow-y-auto border-r border-white/5 p-4 md:flex">
+    <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-56 shrink-0 flex-col gap-6 self-start overflow-y-auto border-r border-white/5 px-4 pb-4 pt-10 md:flex">
       <nav className="flex flex-col gap-6">
         {NAV_SIDEBAR.map((n) => (
           <EnlaceNav key={n.href} href={n.href} label={n.label} />
         ))}
       </nav>
-
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-semibold uppercase tracking-wider text-muted">
+      
+      <div className="mt-8 flex flex-col gap-3">
+        <p className="text-sm font-semibold uppercase tracking-wider text-primary">
           Géneros
         </p>
 

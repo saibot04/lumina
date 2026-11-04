@@ -53,7 +53,7 @@ return (
     {/* Imagen + portada + datos */}
     <section>
         <div
-        className="relative h-48 w-full overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-neutral-800 to-neutral-950 md:h-72"
+        className="relative h-48 w-full overflow-hidden rounded-2xl bg-gradient-to-br from-neutral-800 to-neutral-950 [mask-image:linear-gradient(to_bottom,black_55%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_55%,transparent_100%)] md:h-72"
         role="img"
         aria-label={`Imagen de ${movie.title}`}
         >
@@ -68,7 +68,7 @@ return (
             style={{ backgroundImage: `url(${movie.poster})` }}
             />
         ) : null}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         </div>
 
         <div className="relative z-10 -mt-12 flex flex-col gap-4 px-4 md:-mt-20 md:px-8">
@@ -145,7 +145,6 @@ return (
 
     {/* Sinopsis */}
     <section className="rounded-lg border border-white/10 bg-surface p-4 sm:p-6">
-        <Titulo>Sinopsis de la película</Titulo>
         <p className="text-sm leading-relaxed text-muted">
         {movie.synopsis ?? "Sinopsis no disponible."}
         </p>
