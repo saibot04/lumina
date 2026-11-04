@@ -7,7 +7,7 @@ const explorar = [
   { href: "/perfil", label: "Perfil" },
 ];
 
-// Cambiá estos mails por los reales del equipo
+
 const contactos = [
   "tobias24385@gmail.com",
   "milagroszanini15@gmail.com",
