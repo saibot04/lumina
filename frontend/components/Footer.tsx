@@ -7,10 +7,12 @@ const explorar = [
   { href: "/perfil", label: "Perfil" },
 ];
 
-const informacion = [
-    { href: "/nosotros", label: "Quiénes somos" },
-    { href: "/contacto", label: "Contacto" },
-    { href: "/terminos", label: "Términos y condiciones" },
+// Cambiá estos mails por los reales del equipo
+const contactos = [
+  "tobias24385@gmail.com",
+  "milagroszanini15@gmail.com",
+  "matein06@gmail.com",
+  "@gmail.com",
 ];
 
 export default function Footer() {
@@ -46,13 +48,21 @@ export default function Footer() {
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-foreground">
                 Información
             </h2>
-            <nav className="flex flex-col gap-2 text-sm text-muted">
-                {informacion.map((l) => (
-                <Link key={l.href} href={l.href} className="transition-colors hover:text-primary">
-                    {l.label}
+            <div className="flex flex-col gap-2 text-sm text-muted">
+                {/* Contacto: texto simple, no es un botón */}
+                <div className="flex items-start gap-2">
+                <span className="text-foreground">Contactos:</span>
+                <ul className="space-y-1">
+                    {contactos.map((mail) => (
+                    <li key={mail}>{mail}</li>
+                    ))}
+                </ul>
+                </div>
+
+                <Link href="/terminos" className="mt-4 transition-colors hover:text-primary">
+                Términos y condiciones
                 </Link>
-                ))}
-            </nav>
+            </div>
             </div>
         </div>
 
