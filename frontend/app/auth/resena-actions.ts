@@ -51,7 +51,7 @@ export async function publicarResena(
 ): Promise<ResultadoResena> {
     const { status, data } = await llamar(`/api/peliculas/${peliculaId}/resenas`, "POST", datos);
     const r = resultado(status, data);
-    if (r.ok) revalidatePath(`/pelicula/${peliculaId}`);
+    if (r.ok) revalidatePath("/", "layout");
     return r;
 }
 
@@ -61,14 +61,14 @@ export async function editarResena(
 ): Promise<ResultadoResena> {
     const { status, data } = await llamar(`/api/peliculas/${peliculaId}/resenas/mia`, "PATCH", datos);
     const r = resultado(status, data);
-    if (r.ok) revalidatePath(`/pelicula/${peliculaId}`);
+    if (r.ok) revalidatePath("/", "layout");
     return r;
 }
 
 export async function eliminarResena(peliculaId: string): Promise<ResultadoResena> {
     const { status, data } = await llamar(`/api/peliculas/${peliculaId}/resenas/mia`, "DELETE");
     const r = resultado(status, data);
-    if (r.ok) revalidatePath(`/pelicula/${peliculaId}`);
+    if (r.ok) revalidatePath("/", "layout");
     return r;
 }
 

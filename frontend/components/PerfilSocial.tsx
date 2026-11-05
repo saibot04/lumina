@@ -1,12 +1,19 @@
 "use client";
 
 import { useState, useRef, useSyncExternalStore } from "react";
-import ModalAgregar from "@/components/ModalAgregar";
+import Link from "next/link";
+import ModalAgregar, { type DatosModal, type OpcionPelicula } from "@/components/ModalAgregar";
 import GridCasilleros from "@/components/GridCasilleros";
 import VistaCompletaPeliculas from "@/components/VistaCompletaPeliculas";
 import BotonVolver from "@/components/BotonVolver";
 import { actualizarPerfil } from "@/app/auth/perfil-actions";
-import type { Perfil as PerfilUsuario } from "@/lib/sesion";
+import {
+    publicarResena,
+    editarResena,
+    eliminarResena,
+    deshacerResena,
+} from "@/app/auth/resena-actions";
+import type { Perfil as PerfilUsuario, ResenaPropia } from "@/lib/sesion";
 
 type Stats = { peliculas: number; esteAnio: number; seguidores: number; };
 type ItemLista = { id: number; title: string };
@@ -20,7 +27,26 @@ function leerFoto() {
     return localStorage.getItem("lumina_user_foto");
 }
 
-export default function PerfilSocial({ perfil }: { perfil: PerfilUsuario }) {
+function estrellasTexto(n: number) {
+    return "★".repeat(Math.floor(n)) + (n % 1 ? "½" : "");
+}
+
+function formatearFecha(iso: string) {
+    const [anio, mes, dia] = iso.split("-");
+    return `${dia}/${mes}/${anio}`;
+}
+
+export default function PerfilSocial({
+    perfil,
+    resenas,
+    peliculas,
+    puedeDeshacer,
+}: {
+    perfil: PerfilUsuario;
+    resenas: ResenaPropia[];
+    peliculas: OpcionPelicula[];
+    puedeDeshacer: boolean;
+}) {
     const [tab, setTab] = useState<string>("Perfil");
     const [stats, setStats] = useState<Stats>({
         peliculas: perfil.estadisticas.vistas,
@@ -35,19 +61,23 @@ export default function PerfilSocial({ perfil }: { perfil: PerfilUsuario }) {
     const fotoPerfil = useSyncExternalStore(suscribirFoto, leerFoto, () => null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Edición
+    // Edición del perfil
     const [editando, setEditando] = useState(false);
     const [tempNombre, setTempNombre] = useState(perfil.nombreMostrado);
     const [tempBio, setTempBio] = useState(perfil.bio);
     const [guardando, setGuardando] = useState(false);
     const [errorPerfil, setErrorPerfil] = useState("");
 
-    // Listas principales (siguen en memoria: todavía no tienen tabla en la base)
+    // Listas que todavía viven en memoria (no tienen tabla en la base)
     const [favoritos, setFavoritos] = useState<ItemLista[]>([]);
     const [peliculasVistas, setPeliculasVistas] = useState<ItemLista[]>([]);
     const [watchlist, setWatchlist] = useState<ItemLista[]>([]);
     const [meGusta, setMeGusta] = useState<ItemLista[]>([]);
-    const [reseñas, setReseñas] = useState<{ id: number; pelicula: string; texto: string; estrellas: number }[]>([]);
+
+    // Reseñas: vienen de la base; acá solo se guarda el estado de la pantalla
+    const [errorResena, setErrorResena] = useState("");
+    const [trabajando, setTrabajando] = useState(false);
+    const [reseñaEnEdicion, setReseñaEnEdicion] = useState<ResenaPropia | null>(null);
 
     // Control de vistas (si está en modo "ver más" o en los casilleros principales)
     const [verMasPeliculas, setVerMasPeliculas] = useState(false);
@@ -62,7 +92,6 @@ export default function PerfilSocial({ perfil }: { perfil: PerfilUsuario }) {
         if (file) {
             const url = URL.createObjectURL(file);
             localStorage.setItem("lumina_user_foto", url);
-            // Avisa al componente que la foto cambió
             window.dispatchEvent(new Event("storage"));
         }
     };
@@ -82,7 +111,34 @@ export default function PerfilSocial({ perfil }: { perfil: PerfilUsuario }) {
         setEditando(false);
     };
 
-    const handleGuardarModal = ({ titulo, texto, estrellas }: { titulo: string; texto?: string; estrellas?: number }) => {
+    const cerrarModal = () => {
+        setModalTipo(null);
+        setReseñaEnEdicion(null);
+    };
+
+    const handleGuardarModal = async ({
+        titulo,
+        texto,
+        estrellas,
+        peliculaId,
+    }: DatosModal): Promise<string | void> => {
+        // Las reseñas se guardan en la base (patrón Command en el backend)
+        if (modalTipo === "reseña") {
+            if (!peliculaId) return "Elegí una película del catálogo.";
+
+            const datos = { puntuacion: estrellas ?? 5, texto: texto ?? "" };
+            const yaExiste = resenas.some((r) => r.peliculaId === peliculaId);
+            const r = yaExiste
+                ? await editarResena(peliculaId, datos)
+                : await publicarResena(peliculaId, datos);
+
+            if (!r.ok) {
+                return r.errores?.puntuacion ?? r.errores?.texto ?? r.error ?? "No se pudo guardar la reseña.";
+            }
+            return;
+        }
+
+        // El resto sigue en memoria
         const nuevoItem = { id: Date.now(), title: titulo };
 
         const actualizarLista = (listaActual: ItemLista[], setLista: (lista: ItemLista[]) => void) => {
@@ -102,9 +158,26 @@ export default function PerfilSocial({ perfil }: { perfil: PerfilUsuario }) {
         }
         if (modalTipo === "watchlist") actualizarLista(watchlist, setWatchlist);
         if (modalTipo === "mg") actualizarLista(meGusta, setMeGusta);
-        if (modalTipo === "reseña") {
-            setReseñas([...reseñas, { id: Date.now(), pelicula: titulo, texto: texto || "", estrellas: estrellas || 5 }]);
-        }
+    };
+
+    const quitarResena = async (r: ResenaPropia) => {
+        if (!window.confirm(`¿Eliminar tu reseña de "${r.titulo}"?`)) return;
+
+        setTrabajando(true);
+        setErrorResena("");
+        const res = await eliminarResena(r.peliculaId);
+        setTrabajando(false);
+
+        if (!res.ok) setErrorResena(res.error ?? "No se pudo eliminar la reseña.");
+    };
+
+    const deshacerUltima = async () => {
+        setTrabajando(true);
+        setErrorResena("");
+        const res = await deshacerResena();
+        setTrabajando(false);
+
+        if (!res.ok) setErrorResena(res.error ?? "No se pudo deshacer la acción.");
     };
 
     return (
@@ -210,9 +283,70 @@ export default function PerfilSocial({ perfil }: { perfil: PerfilUsuario }) {
 
                     {tab === "Reseñas" && (
                         <div>
-                            <div className="flex justify-between items-center mb-6"><h2 className="text-xs uppercase text-gray-400">Tus Críticas</h2><button onClick={() => { setIndiceCasillero(null); setModalTipo("reseña"); }} className="bg-[#fccb30] text-black text-[11px] px-3 py-1.5 rounded uppercase">+ Agregar reseña</button></div>
-                            {reseñas.length === 0 ? <div className="text-center py-16 text-gray-500 text-xs border border-dashed rounded-lg">No escribiste ninguna reseña todavía.</div> :
-                                <div className="space-y-4">{reseñas.map(r => <div key={r.id} className="bg-[#141414] border border-white/5 p-5 rounded-lg"><h3 className="font-semibold">{r.pelicula}</h3><p className="text-gray-300 text-sm">{r.texto}</p></div>)}</div>}
+                            <div className="flex justify-between items-center mb-6 gap-3">
+                                <h2 className="text-xs uppercase text-gray-400">Tus Críticas</h2>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={deshacerUltima}
+                                        disabled={!puedeDeshacer || trabajando}
+                                        className="border border-white/20 text-gray-300 text-[11px] px-3 py-1.5 rounded uppercase disabled:cursor-not-allowed disabled:opacity-40"
+                                    >
+                                        ↶ Deshacer
+                                    </button>
+                                    <button
+                                        onClick={() => { setReseñaEnEdicion(null); setIndiceCasillero(null); setModalTipo("reseña"); }}
+                                        className="bg-[#fccb30] text-black text-[11px] px-3 py-1.5 rounded uppercase"
+                                    >
+                                        + Agregar reseña
+                                    </button>
+                                </div>
+                            </div>
+
+                            {errorResena && (
+                                <p role="alert" className="mb-4 text-xs text-red-400">{errorResena}</p>
+                            )}
+
+                            {resenas.length === 0 ? (
+                                <div className="text-center py-16 text-gray-500 text-xs border border-dashed rounded-lg">No escribiste ninguna reseña todavía.</div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {resenas.map((r) => (
+                                        <div key={r.id} className="bg-[#141414] border border-white/5 p-5 rounded-lg">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div>
+                                                    <Link href={`/pelicula/${r.peliculaId}`} className="font-semibold hover:text-[#fccb30]">
+                                                        {r.titulo}
+                                                    </Link>
+                                                    <p className="text-[#fccb30] text-sm tracking-widest" aria-label={`${r.puntuacion} de 5 estrellas`}>
+                                                        {estrellasTexto(r.puntuacion)}{" "}
+                                                        <span className="text-xs text-gray-400 tracking-normal">
+                                                            {String(r.puntuacion).replace(".", ",")} / 5
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <div className="flex shrink-0 gap-3 text-[11px] uppercase">
+                                                    <button
+                                                        onClick={() => { setReseñaEnEdicion(r); setModalTipo("reseña"); }}
+                                                        disabled={trabajando}
+                                                        className="text-gray-400 hover:text-[#fccb30] disabled:opacity-40"
+                                                    >
+                                                        Editar
+                                                    </button>
+                                                    <button
+                                                        onClick={() => quitarResena(r)}
+                                                        disabled={trabajando}
+                                                        className="text-gray-400 hover:text-red-400 disabled:opacity-40"
+                                                    >
+                                                        Eliminar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            {r.texto && <p className="text-gray-300 text-sm mt-2">{r.texto}</p>}
+                                            <p className="text-[11px] text-gray-500 mt-2">{formatearFecha(r.fecha)}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -253,8 +387,23 @@ export default function PerfilSocial({ perfil }: { perfil: PerfilUsuario }) {
                 </div>
             </div>
 
-            {/* Modal centralizado */}
-            <ModalAgregar tipo={modalTipo} onClose={() => setModalTipo(null)} onGuardar={handleGuardarModal} />
+            {/* Modal centralizado: la key hace que se reinicie al pasar de "nueva" a "editar" */}
+            <ModalAgregar
+                key={reseñaEnEdicion?.id ?? "nueva"}
+                tipo={modalTipo}
+                onClose={cerrarModal}
+                onGuardar={handleGuardarModal}
+                peliculas={peliculas}
+                inicial={
+                    reseñaEnEdicion
+                        ? {
+                            peliculaId: reseñaEnEdicion.peliculaId,
+                            estrellas: reseñaEnEdicion.puntuacion,
+                            texto: reseñaEnEdicion.texto,
+                        }
+                        : undefined
+                }
+            />
         </main>
     );
 }
