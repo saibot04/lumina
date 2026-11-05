@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
-import type { Movie } from "@/lib/movies";
 import { actividadDePelicula, fetchPelicula } from "@/lib/movies";
+import {
+    obtenerUsuario,
+    obtenerMiResena,
+    obtenerEstadoDeshacer,
+} from "@/lib/sesion";
 import AccionesPelicula from "@/components/AccionesPelicula";
 import ResumenCalificaciones from "@/components/ResumenCalificaciones";
 import TuResena from "@/components/TuResena";
@@ -8,6 +12,7 @@ import ActividadAmigos from "@/components/ActividadAmigos";
 import DetallesPelicula from "@/components/DetallesPelicula";
 import ResenaCard from "@/components/ResenaCard";
 import BotonVolver from "@/components/BotonVolver";
+import BotonTrailer from "@/components/BotonTrailer";
 
 // Ubicación: app/(app)/pelicula/[id]/page.tsx
 
@@ -17,16 +22,6 @@ function Titulo({ children }: { children: React.ReactNode }) {
             {children}
         </h3>
     );
-}
-
-function urlTrailer(movie: Movie): string {
-    // TODO (backend): cuando la API devuelva el tráiler, priorizar movie.trailer
-    if (movie.trailer) return movie.trailer;
-    if (movie.trailerKey) return `https://www.youtube.com/watch?v=${movie.trailerKey}`;
-    const consulta = encodeURIComponent(
-        `${movie.title} ${movie.year ?? ""} tráiler`.trim()
-    );
-    return `https://www.youtube.com/results?search_query=${consulta}`;
 }
 
 export default async function Pelicula({
@@ -39,6 +34,12 @@ export default async function Pelicula({
     const movie = await fetchPelicula(id);
 
     if (!movie) notFound();
+
+    const [usuario, miResena, estadoDeshacer] = await Promise.all([
+        obtenerUsuario(),
+        obtenerMiResena(id),
+        obtenerEstadoDeshacer(),
+    ]);
 
     // HU-12: de la más reciente a la más antigua
     const reviews = [...(movie.reviews ?? [])].sort((a, b) =>
@@ -113,19 +114,7 @@ export default async function Pelicula({
                             </p>
 
                             <div className="flex flex-wrap items-center gap-4">
-                                <a
-                                    href={urlTrailer(movie)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    aria-label={
-                                        movie.trailer || movie.trailerKey
-                                            ? `Ver tráiler de ${movie.title}`
-                                            : `Buscar tráiler de ${movie.title} en YouTube`
-                                    }
-                                    className="inline-flex min-h-10 items-center gap-2 rounded border border-primary bg-primary px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-black transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                                >
-                                    ▶ Trailer
-                                </a>
+                                <BotonTrailer trailerKey={movie.trailerKey} titulo={movie.title} />
                                 {movie.duration && (
                                     <span className="text-sm text-muted">{movie.duration} min</span>
                                 )}
@@ -155,7 +144,12 @@ export default async function Pelicula({
             {/* Tu calificación */}
             <section className="rounded-lg border border-white/10 bg-surface p-4 sm:p-6">
                 <Titulo>Tu calificación</Titulo>
-                <TuResena />
+                <TuResena
+                    peliculaId={movie.id}
+                    usuarioActual={usuario?.nombreUsuario ?? null}
+                    miResena={miResena}
+                    puedeDeshacer={estadoDeshacer?.puedeDeshacer ?? false}
+                />
             </section>
 
             {/* Actividad de amigos */}
