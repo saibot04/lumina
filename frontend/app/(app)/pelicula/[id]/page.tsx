@@ -123,7 +123,7 @@ export default async function Pelicula({
                     </div>
 
                     <div className="flex justify-end">
-                        <AccionesPelicula />
+                        <AccionesPelicula movie={movie} />
                     </div>
                 </div>
             </section>

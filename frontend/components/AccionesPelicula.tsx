@@ -1,42 +1,93 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
-const base =
-  "flex h-14 w-20 flex-col items-center justify-center gap-1 rounded border text-[11px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background";
-const inactivo =
-  "border-primary bg-transparent text-primary [@media(hover:hover)]:hover:bg-primary [@media(hover:hover)]:hover:text-black focus-visible:bg-primary focus-visible:text-black";
-const activo = "border-primary bg-primary text-black";
+type ItemWatchlist = {
+    id: string | number;
+    title: string;
+    subtitle: string;
+    poster: string;
+};
 
-export default function AccionesPelicula() {
-const [meGusta, setMeGusta] = useState(false);
-const [enLista, setEnLista] = useState(false);
+function leerWatchlist(): ItemWatchlist[] {
+    try {
+        return JSON.parse(localStorage.getItem("lumina_watchlist") || "[]");
+    } catch {
+        return [];
+    }
+}
 
-// TODO (backend): persistir me gusta / watchlist
+function suscribir(avisar: () => void) {
+    window.addEventListener("storage", avisar);
+    return () => window.removeEventListener("storage", avisar);
+}
 
-return (
-    <div className="flex gap-3">
-    <button
-        type="button"
-        onClick={() => setMeGusta((v) => !v)}
-        aria-pressed={meGusta}
-        aria-label={meGusta ? "Quitar me gusta" : "Me gusta"}
-        className={`${base} ${meGusta ? activo : inactivo}`}
-    >
-        <span className="text-lg leading-none">{meGusta ? "♥" : "♡"}</span>
-        Me gusta
-    </button>
+export default function AccionesPelicula({
+    movie,
+}: {
+    movie: {
+        id: string | number;
+        title: string;
+        year?: number;
+        director?: string;
+        poster?: string;
+    };
+}) {
+    // "Me gusta" sigue siendo visual: todavía no tiene tabla en la base
+    const [meGusta, setMeGusta] = useState(false);
 
-    <button
-        type="button"
-        onClick={() => setEnLista((v) => !v)}
-        aria-pressed={enLista}
-        aria-label={enLista ? "Quitar de watchlist" : "Agregar a watchlist"}
-        className={`${base} ${enLista ? activo : inactivo}`}
-    >
-        <span className="text-lg leading-none">{enLista ? "✓" : "◷"}</span>
-        Watchlist
-    </button>
-    </div>
-);
+    // La watchlist se lee del navegador, igual que Mi lista
+    const enLista = useSyncExternalStore(
+        suscribir,
+        () => leerWatchlist().some((p) => String(p.id) === String(movie.id)),
+        () => false
+    );
+
+    const alternarLista = () => {
+        const guardada = leerWatchlist();
+
+        const actualizada = enLista
+            ? guardada.filter((p) => String(p.id) !== String(movie.id))
+            : [
+                  ...guardada,
+                  {
+                      id: movie.id,
+                      title: movie.title,
+                      subtitle: `${movie.director || "Director desconocido"}, ${movie.year || ""}`,
+                      poster: movie.poster || "",
+                  },
+              ];
+
+        localStorage.setItem("lumina_watchlist", JSON.stringify(actualizada));
+        window.dispatchEvent(new Event("storage"));
+    };
+
+    const base =
+        "flex h-14 w-20 flex-col items-center justify-center gap-1 rounded border text-[11px] transition";
+    const activo = "border-primary text-primary";
+    const inactivo = "border-white/20 text-muted hover:border-primary hover:text-primary";
+
+    return (
+        <div className="flex gap-3">
+            <button
+                type="button"
+                onClick={() => setMeGusta((v) => !v)}
+                aria-pressed={meGusta}
+                className={`${base} ${meGusta ? activo : inactivo}`}
+            >
+                <span className="text-lg leading-none">{meGusta ? "♥" : "♡"}</span>
+                Me gusta
+            </button>
+
+            <button
+                type="button"
+                onClick={alternarLista}
+                aria-pressed={enLista}
+                className={`${base} ${enLista ? activo : inactivo}`}
+            >
+                <span className="text-lg leading-none">{enLista ? "✓" : "◷"}</span>
+                Watchlist
+            </button>
+        </div>
+    );
 }
