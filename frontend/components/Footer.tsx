@@ -62,13 +62,26 @@ export default function Footer() {
                 <Link href="/terminos" className="mt-4 transition-colors hover:text-primary">
                 Términos y condiciones
                 </Link>
+
+                <a
+                href="https://www.themoviedb.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-primary"
+                >
+                Datos de películas: TMDB
+                </a>
             </div>
             </div>
         </div>
 
-        <p className="mx-auto mt-10 max-w-6xl border-t border-white/10 pt-6 text-xs text-muted">
-            © 2026 Lumina. Proyecto de práctica POO.
-        </p>
+        <div className="mx-auto mt-10 max-w-6xl space-y-2 border-t border-white/10 pt-6 text-xs text-muted">
+            <p>
+            This product uses the TMDB API but is not endorsed or certified by
+            TMDB.
+            </p>
+            <p>© 2026 Lumina. Proyecto de práctica POO.</p>
+        </div>
         </footer>
     );
 }
