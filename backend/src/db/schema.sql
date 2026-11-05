@@ -1,7 +1,7 @@
 -- Se borra todo y se vuelve a crear: sirve para desarrollo,
 -- pero ejecutarlo elimina los datos existentes.
-DROP TABLE IF EXISTS sesiones, vistas, resenas, elenco, pelicula_genero,
-                personas, generos, peliculas, usuarios CASCADE;
+DROP TABLE IF EXISTS comandos_resena, sesiones, vistas, resenas, elenco, pelicula_genero,
+                     personas, generos, peliculas, usuarios CASCADE;
 
 CREATE TABLE usuarios (
 id              SERIAL PRIMARY KEY,
@@ -82,3 +82,17 @@ usuario_id   INT NOT NULL REFERENCES usuarios(id)  ON DELETE CASCADE,
 pelicula_id  INT NOT NULL REFERENCES peliculas(id) ON DELETE CASCADE,
 visto_en     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE comandos_resena (
+id           SERIAL PRIMARY KEY,
+usuario_id   INT NOT NULL REFERENCES usuarios(id)  ON DELETE CASCADE,
+pelicula_id  INT NOT NULL REFERENCES peliculas(id) ON DELETE CASCADE,
+tipo         VARCHAR(10) NOT NULL CHECK (tipo IN ('publicar', 'editar', 'eliminar')),
+antes        JSONB,
+despues      JSONB,
+creado_en    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+deshecho_en  TIMESTAMPTZ
+);
+
+CREATE INDEX idx_comandos_resena_usuario
+ON comandos_resena (usuario_id, id DESC);

@@ -60,3 +60,24 @@ export async function requerirUsuario(): Promise<UsuarioSesion> {
 export async function obtenerPerfil(): Promise<Perfil | null> {
     return pedirConSesion<Perfil>("/api/usuarios/yo");
 }
+
+export type MiResena = {
+    puntuacion: number;
+    texto: string;
+    creadoEn: string;
+} | null;
+
+export type EstadoDeshacer = {
+    puedeDeshacer: boolean;
+    ultima: { tipo: string; peliculaId: string; titulo: string } | null;
+};
+
+/** Mi reseña de una película (null si no hay sesión o todavía no reseñé). */
+export async function obtenerMiResena(peliculaId: string): Promise<MiResena> {
+    return pedirConSesion<NonNullable<MiResena>>(`/api/peliculas/${peliculaId}/resenas/mia`);
+}
+
+/** Para habilitar o deshabilitar el botón "Deshacer". */
+export async function obtenerEstadoDeshacer(): Promise<EstadoDeshacer | null> {
+    return pedirConSesion<EstadoDeshacer>("/api/resenas/deshacer");
+}
